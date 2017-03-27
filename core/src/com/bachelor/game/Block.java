@@ -1,8 +1,12 @@
 package com.bachelor.game;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.VertexAttributes;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
+import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 
 public class Block extends Item {
 
@@ -27,11 +31,13 @@ public class Block extends Item {
     corner4 = new MeshPartBuilder.VertexInfo();
   }
 
-  public MeshBuilder render(MeshBuilder meshBuilder) {
-    return renderRectangle(position.getX(), position.getY(), position.getZ(), BlockType.Gravel, meshBuilder);
+  public void render(MeshBuilder meshBuilder) {
+    renderRectangle(position.getX(), position.getY(), position.getZ(), BlockType.Gravel, meshBuilder);
   }
 
-  private MeshBuilder renderRectangle(float x, float y, float z, BlockType type, MeshBuilder meshBuilder) {
+  private void renderRectangle(float x, float y, float z, BlockType type, MeshBuilder meshBuilder) {
+//    meshBuilder.setUVRange(1, 0, 1, 0);
+
     corner1.setPos(x, y, z);
     corner2.setPos(x + SIZE, y, z);
     corner3.setPos(x + SIZE, y + SIZE, z);
@@ -73,7 +79,5 @@ public class Block extends Item {
     corner4.setPos(x + SIZE, y + SIZE, z);
     meshBuilder.setColor(Color.BROWN);
     meshBuilder.rect(corner1, corner2, corner3, corner4);
-
-    return meshBuilder;
   }
 }

@@ -3,9 +3,11 @@ package com.bachelor.game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
@@ -41,11 +43,12 @@ public class Renderer {
     meshBuilder = new MeshBuilder();
 
     Material matWhite = new Material(ColorAttribute.createDiffuse(Color.WHITE));
+    Material texMat = new Material(TextureAttribute.createDiffuse(new Texture("gravel.jpg")));
 
     ModelBuilder modelBuilder = new ModelBuilder();
 
     modelBuilder.begin();
-    MeshPartBuilder meshPartBuilder = modelBuilder.part("planeGround", GL20.GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal, matWhite);
+    MeshPartBuilder meshPartBuilder = modelBuilder.part("planeGround", GL20.GL_TRIANGLES, VertexAttributes.Usage.TextureCoordinates | VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal, texMat);
     meshPartBuilder.rect(-2f, 0f, -2f, -2f, 0f, 2f, 2f, 0f, 2f,  2f, 0f, -2f,0f, 1f, 0f);
     Node planeGround = modelBuilder.node();
     planeGround.id = "planeGround";
@@ -66,16 +69,17 @@ public class Renderer {
 
     game.getCamera().update();
     modelBatch.begin(game.getCamera());
-    meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal, GL20.GL_TRIANGLES);
+    meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.TextureCoordinates | VertexAttributes.Usage.Normal, GL20.GL_TRIANGLES);
     game.getWorld().render(meshBuilder);
 
     ModelBuilder builder = new ModelBuilder();
     builder.begin();
-    builder.part("a", meshBuilder.end(), GL20.GL_TRIANGLES, new Material(ColorAttribute.createDiffuse(Color.BROWN)));
+//    builder.part("Box", meshBuilder.end(), GL20.GL_TRIANGLES, new Material(ColorAttribute.createDiffuse(Color.BROWN)));
+    builder.part("Box", meshBuilder.end(), GL20.GL_TRIANGLES, new Material(TextureAttribute.createDiffuse(new Texture("gravel.jpg"))));
     Model model = builder.end();
     ModelInstance instance = new ModelInstance(model);
 
-    modelBatch.render(instance);
+//    modelBatch.render(instance);
     modelBatch.render(ground);
     modelBatch.end();
   }

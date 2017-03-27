@@ -34,7 +34,7 @@ public class BachelorClient extends ApplicationAdapter {
 
 	private void initCamera() {
 		camera = new PerspectiveCamera(FIELD_OF_VIEW, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		camera.position.set(0f, 1.6f, 0f);
+		camera.position.set(0f, Player.CAMERA_HEIGHT, 0f);
 		camera.near = 0.1f;
 		camera.far = 100f;
 		camera.update();

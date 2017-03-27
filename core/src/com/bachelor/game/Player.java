@@ -76,11 +76,11 @@ public class Player {
 
     switch (direction) {
       case Left:
-        vec.set(0, -WALK_SPEED);
+        vec.set(0f, -WALK_SPEED);
         break;
 
       case Right:
-        vec.set(0, WALK_SPEED);
+        vec.set(0f, WALK_SPEED);
         break;
 
       case Forward:
