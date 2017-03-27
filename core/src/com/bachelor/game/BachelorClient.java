@@ -19,8 +19,11 @@ public class BachelorClient extends ApplicationAdapter {
 
 	private Player player;
 
+	private World world;
+
 	@Override
 	public void create () {
+		world = World.getInstance();
 		initCamera();
 		renderer = new Renderer(this);
 		player = new Player(camera);
@@ -51,5 +54,9 @@ public class BachelorClient extends ApplicationAdapter {
 
 	public PerspectiveCamera getCamera() {
 		return camera;
+	}
+
+	public World getWorld() {
+		return world;
 	}
 }

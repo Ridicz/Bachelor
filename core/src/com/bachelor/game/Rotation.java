@@ -1,5 +1,7 @@
 package com.bachelor.game;
 
+import com.badlogic.gdx.math.MathUtils;
+
 public class Rotation {
 
   private float yaw;
@@ -32,7 +34,12 @@ public class Rotation {
   }
 
   public void setRotation(float yaw, float pitch) {
-    this.yaw = yaw;
-    this.pitch = pitch;
+//    this.yaw = yaw;
+//    this.pitch = pitch;
+
+    this.pitch = MathUtils.clamp((this.pitch + pitch) % 360, -90, 90);
+    this.yaw = (this.yaw + yaw) % 360;
+
+    System.out.println(pitch + " " + yaw);
   }
 }

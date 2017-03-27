@@ -9,7 +9,7 @@ import java.util.Set;
 
 public class InputHandler implements InputProcessor {
 
-  private static final float MOUSE_SENSITIVITY = 0.05f;
+  private static final float MOUSE_SENSITIVITY = 0.2f;
 
   private Set<Integer> pressedKeys;
 
@@ -56,7 +56,10 @@ public class InputHandler implements InputProcessor {
 
   @Override
   public boolean mouseMoved(int screenX, int screenY) {
+    float yaw = Gdx.input.getDeltaX() * MOUSE_SENSITIVITY;
+    float pitch = Gdx.input.getDeltaY() * MOUSE_SENSITIVITY;
 
+    player.rotate(yaw, pitch);
 
     return false;
   }
@@ -68,19 +71,23 @@ public class InputHandler implements InputProcessor {
 
   public void update() {
     if (pressedKeys.contains(Input.Keys.W)) {
-      player.forward();
+      player.move(Direction.Forward);
     }
 
     if (pressedKeys.contains(Input.Keys.S)) {
-
+      player.move(Direction.Backward);
     }
 
     if (pressedKeys.contains(Input.Keys.A)) {
-
+      player.move(Direction.Left);
     }
 
     if (pressedKeys.contains(Input.Keys.D)) {
+      player.move(Direction.Right);
+    }
 
+    if (pressedKeys.contains(Input.Keys.SPACE)) {
+      player.jump();
     }
   }
 }

@@ -4,16 +4,18 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.VertexAttributes;
-import com.badlogic.gdx.graphics.g3d.Environment;
-import com.badlogic.gdx.graphics.g3d.Material;
-import com.badlogic.gdx.graphics.g3d.ModelBatch;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.model.Node;
+import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
+import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Vector3;
 
 import static com.badlogic.gdx.Gdx.gl;
 
@@ -25,6 +27,8 @@ public class Renderer {
 
   private BachelorClient game;
 
+  private MeshBuilder meshBuilder;
+
   private Environment environment;
 
   public Renderer(BachelorClient game) {
@@ -34,6 +38,7 @@ public class Renderer {
 
   private void init() {
     modelBatch = new ModelBatch(new DefaultShaderProvider());
+    meshBuilder = new MeshBuilder();
 
     Material matWhite = new Material(ColorAttribute.createDiffuse(Color.WHITE));
 
@@ -41,7 +46,7 @@ public class Renderer {
 
     modelBuilder.begin();
     MeshPartBuilder meshPartBuilder = modelBuilder.part("planeGround", GL20.GL_TRIANGLES, VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal, matWhite);
-    meshPartBuilder.rect(-50f, 0f, -50f, -50f, 0f, 50f, 50f, 0f, 50f,  50f, 0f, -50f,0f, 1f, 0f);
+    meshPartBuilder.rect(-2f, 0f, -2f, -2f, 0f, 2f, 2f, 0f, 2f,  2f, 0f, -2f,0f, 1f, 0f);
     Node planeGround = modelBuilder.node();
     planeGround.id = "planeGround";
     planeGround.translation.set(0, 0, 0);
@@ -53,18 +58,25 @@ public class Renderer {
   }
 
   public void render() {
+    Gdx.graphics.setTitle(String.valueOf(Gdx.graphics.getFramesPerSecond()));
+
     gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
     gl.glClearColor(0, 0, 0, 1);
     gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
     game.getCamera().update();
-
     modelBatch.begin(game.getCamera());
+    meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal, GL20.GL_TRIANGLES);
+    game.getWorld().render(meshBuilder);
+
+    ModelBuilder builder = new ModelBuilder();
+    builder.begin();
+    builder.part("a", meshBuilder.end(), GL20.GL_TRIANGLES, new Material(ColorAttribute.createDiffuse(Color.BROWN)));
+    Model model = builder.end();
+    ModelInstance instance = new ModelInstance(model);
+
+    modelBatch.render(instance);
     modelBatch.render(ground);
     modelBatch.end();
-  }
-
-  private void updateCamera() {
-
   }
 }
