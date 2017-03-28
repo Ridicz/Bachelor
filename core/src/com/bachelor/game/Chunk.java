@@ -40,6 +40,10 @@ public class Chunk {
     storage[x][y][z] = new Block(new Position(x, y, z), type);
   }
 
+  public Block[][][] getStorage() {
+    return storage;
+  }
+
   public void render(MeshBuilder meshBuilder) {
     for (Block[][] blocks : storage) {
       for (Block[] block : blocks) {
