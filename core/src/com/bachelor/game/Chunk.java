@@ -1,6 +1,5 @@
 package com.bachelor.game;
 
-import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.math.Vector2;
 
 public class Chunk {
@@ -11,8 +10,6 @@ public class Chunk {
 
   private static final short LENGTH = 16;
 
-//  private MeshBuilder meshBuilder;
-
   private int positionX;
 
   private int positionY;
@@ -22,10 +19,9 @@ public class Chunk {
   private Block[][][] storage;
 
   public Chunk(int positionX, int positionY) {
-    this.positionX = positionX;
-    this.positionY = positionY;
+    this.positionX = positionX * WIDTH;
+    this.positionY = positionY * LENGTH;
     storage = new Block[WIDTH][HEIGHT][LENGTH];
-//    meshBuilder = new MeshBuilder();
   }
 
   public Block getBlock(int x, int y, int z) {
@@ -37,22 +33,10 @@ public class Chunk {
   }
 
   public void setBlock(int x, int y, int z, BlockType type) {
-    storage[x][y][z] = new Block(new Position(x, y, z), type);
+    storage[x % WIDTH][y % HEIGHT][z % LENGTH] = new Block(new Position(positionX + x, y, positionY + z), type);
   }
 
   public Block[][][] getStorage() {
     return storage;
-  }
-
-  public void render(MeshBuilder meshBuilder) {
-    for (Block[][] blocks : storage) {
-      for (Block[] block : blocks) {
-        for (Block block1 : block) {
-          if (block1 != null) {
-            block1.render(meshBuilder);
-          }
-        }
-      }
-    }
   }
 }

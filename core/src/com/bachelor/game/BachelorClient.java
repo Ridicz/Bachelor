@@ -45,6 +45,7 @@ public class BachelorClient extends ApplicationAdapter {
 		inputHandler.update();
 		player.update();
 		renderer.render();
+//		renderer.cleanup();
 	}
 	
 	@Override

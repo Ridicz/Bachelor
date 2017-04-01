@@ -1,8 +1,15 @@
 package com.bachelor.game;
 
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Mesh;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g3d.Material;
+import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
+import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 public class World {
@@ -19,9 +26,19 @@ public class World {
 
   private List<Chunk> chunkList;
 
+  private List<Mesh> meshList;
+
+  private static ModelBuilder modelBuilder;
+
+  private static MeshBuilder meshBuilder;
+
+  private Material material;
+
   private World() {
-    chunkList = new LinkedList<Chunk>();
+    chunkList = new ArrayList<Chunk>();
+    meshList = new ArrayList<Mesh>();
     createTestMap();
+    material = new Material(TextureAttribute.createDiffuse(new Texture("atlas.jpg")));
   }
 
   public static World getInstance() {
@@ -33,22 +50,66 @@ public class World {
     return instance;
   }
 
-  private void createTestMap() {
-    Chunk chunk = new Chunk(0, 0);
-    chunk.setBlock(1, 0, 0, BlockType.Gravel);
-    chunk.setBlock(2, 0, 0, BlockType.Gravel);
-    chunk.setBlock(3, 0, 0, BlockType.Gravel);
-    chunk.setBlock(4, 0, 0, BlockType.Gravel);
-    chunk.setBlock(0, 0, 1, BlockType.Gravel);
-    chunk.setBlock(0, 0, 2, BlockType.Gravel);
-    chunk.setBlock(0, 0, 3, BlockType.Gravel);
-    chunk.setBlock(0, 1, 0, BlockType.Gravel);
-    chunkList.add(chunk);
+  public static void setModelBuilder(ModelBuilder modelBuilder) {
+    World.modelBuilder = modelBuilder;
   }
 
-  public void render(MeshBuilder meshBuilder) {
-    for (Chunk chunk : chunkList) {
-      chunk.render(meshBuilder);
+  public static void setMeshBuilder(MeshBuilder meshBuilder) {
+    World.meshBuilder = meshBuilder;
+  }
+
+  private void createTestMap() {
+    int counter = 0;
+
+    for (int i = -4; i < 16; i++) {
+      for (int j = -4; j < 16; j++) {
+        chunkList.add(new Chunk(i, j));
+      }
     }
+
+    for (int i = 0; i < 16; i++) {
+      for (Chunk chunk : chunkList) {
+        chunk.setBlock(0, i, 15, BlockType.Gravel);
+        chunk.setBlock(15, i, 0, BlockType.Stone);
+        chunk.setBlock(0, i, 0, BlockType.Gravel);
+        chunk.setBlock(15, i, 15, BlockType.Stone);
+
+        chunk.setBlock(0, 15, i, BlockType.Gravel);
+        chunk.setBlock(i, 15, 0, BlockType.Stone);
+        chunk.setBlock(i, 15, 15, BlockType.Gravel);
+        chunk.setBlock(15, 15, i, BlockType.Stone);
+
+        counter += 8;
+      }
+    }
+
+    System.out.println(counter);
+  }
+
+  public Model render() {
+    for (Mesh mesh : meshList) {
+      mesh.dispose();
+    }
+
+    meshBuilder.clear();
+    meshList.clear();
+
+    for (Chunk chunk : chunkList) {
+      meshList.add(BlockRenderer.renderChunk(chunk));
+    }
+
+    modelBuilder.begin();
+
+    for (Mesh mesh : meshList) {
+      modelBuilder.part("Chunk", mesh, GL20.GL_TRIANGLES, material);
+    }
+
+//    modelBuilder.part("Chunk", meshBuilder.end(), GL20.GL_TRIANGLES, material);
+
+    return modelBuilder.end();
+  }
+
+  public static Chunk getChunk(int x, int y) {
+    return null;
   }
 }
