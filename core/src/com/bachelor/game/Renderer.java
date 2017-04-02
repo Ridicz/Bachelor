@@ -50,7 +50,6 @@ public class Renderer {
     meshBuilder = new MeshBuilder();
     modelBuilder = new ModelBuilder();
 
-    BlockRenderer.setModelBuilder(modelBuilder);
     BlockRenderer.setMeshBuilder(meshBuilder);
 
     World.setMeshBuilder(meshBuilder);
@@ -66,13 +65,13 @@ public class Renderer {
   public void render() {
     modelBatch.dispose();
 
-    Gdx.graphics.setTitle(String.valueOf(Gdx.graphics.getFramesPerSecond()));
     gl.glClear(GL20.GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     gl.glClearColor(0, 0, 0, 1);
 
     game.getCamera().update();
     modelBatch.begin(game.getCamera());
 
+    modelBatch.render(game.getWorld().getSkydome());
     modelBatch.render(new ModelInstance(game.getWorld().render()));
 
     modelBatch.end();

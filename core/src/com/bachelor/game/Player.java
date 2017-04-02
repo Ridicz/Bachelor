@@ -1,7 +1,9 @@
 package com.bachelor.game;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.math.*;
+import com.badlogic.gdx.math.collision.Ray;
 
 public class Player {
 
@@ -11,7 +13,7 @@ public class Player {
 
   public static final float CAMERA_HEIGHT = 1.6f;
 
-  private static final float WALK_SPEED = 0.05f;
+  private static final float WALK_SPEED = 0.15f;
 
   private Position position;
 
@@ -27,10 +29,8 @@ public class Player {
 
   private float verticalVelocity = 0f;
 
-  private boolean onGround = true;
-
   public Player(PerspectiveCamera camera) {
-    this(camera, new Position(), new Rotation());
+    this(camera, new Position(1, 50, 1), new Rotation());
   }
 
   public Player(PerspectiveCamera camera, Position position) {
@@ -68,9 +68,9 @@ public class Player {
   }
 
   public void move(Direction direction) {
-    if (!isOnGround()) {
-      return;
-    }
+//    if (!isOnGround()) {
+//      return;
+//    }
 
     Vector2 vec =  new Vector2();
 
@@ -103,7 +103,13 @@ public class Player {
   }
 
   private boolean isOnGround() {
-    return MathUtils.isEqual(position.getY(), 0f);
+    if (verticalVelocity > 0 || getCurrentChunk().getBlock(position) == null) {
+      return false;
+    }
+
+    verticalVelocity = 0f;
+
+    return true;
   }
 
   public void rotate(float yaw, float pitch) {
@@ -117,26 +123,77 @@ public class Player {
     mat.set(q);
 
     camera.direction.prj(mat);
-    camera.direction.rotate(vec.crs(camera.up), -pitch);
+
+    if (camera.direction.y >= -0.985f && pitch > 0) {
+      camera.direction.rotate(vec.crs(camera.up), -pitch);
+    }
+
+    if (camera.direction.y <= 0.985f && pitch < 0) {
+      camera.direction.rotate(vec.crs(camera.up), -pitch);
+    }
   }
 
   public void jump() {
     if (isOnGround()) {
       verticalVelocity = 1f;
-      onGround = false;
     }
   }
 
   public void update() {
     if (!isOnGround()) {
       position.move(0f, 0.2f * verticalVelocity, 0f);
-      verticalVelocity -= 0.1f;
-    }
-
-    if (position.getY() <= 0) {
-      onGround = true;
+      verticalVelocity = Math.max(-2f, verticalVelocity - 0.04f);
     }
 
     camera.position.set(position.getX(), position.getY() + CAMERA_HEIGHT, position.getZ());
+  }
+
+  public Chunk getCurrentChunk() {
+    return World.getChunk(position);
+  }
+
+  public void action(int screenX, int screenY) {
+    Block block = getTargetBlock(screenX, screenY);
+
+    if (block != null) {
+      //Gdx.graphics.setTitle(block.toString());
+
+      System.out.println(block.getPosition().getPosition());
+
+      getCurrentChunk().destroyBlock(block);
+
+    } else {
+      Gdx.graphics.setTitle("Null");
+    }
+  }
+
+  private Block getTargetBlock(int screenX, int screenY) {
+    Ray ray = camera.getPickRay(900, 450);
+
+    float distance = -1f;
+
+    Block result = null;
+
+    for (Block block : getCurrentChunk().getBlocks()) {
+      Position position = new Position(block.getPosition().getX() + 0.5f, block.getPosition().getY() + 0.5f, block.getPosition().getZ() + 0.5f);
+      float len = ray.direction.dot(position.getX() - ray.origin.x, position.getY() - ray.origin.y, position.getY() - ray.origin.z);
+
+      if (len < 0f) {
+        continue;
+      }
+
+      float dist2 = position.getPosition().dst2(ray.origin.x+ray.direction.x*len, ray.origin.y+ray.direction.y*len, ray.origin.z+ray.direction.z*len);
+
+      if (distance >= 0f && dist2 > distance) {
+        continue;
+      }
+
+      if (dist2 <= 1f) {
+        result = block;
+        distance = dist2;
+      }
+    }
+
+    return result;
   }
 }

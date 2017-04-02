@@ -33,4 +33,19 @@ public class Position {
   public Vector3 getPosition() {
     return new Vector3(position.x, position.y, position.z);
   }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    Position position1 = (Position) o;
+
+    return position.equals(position1.position);
+  }
+
+  @Override
+  public int hashCode() {
+    return position.hashCode();
+  }
 }
