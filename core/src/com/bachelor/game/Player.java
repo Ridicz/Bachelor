@@ -168,7 +168,7 @@ public class Player {
   }
 
   private Block getTargetBlock(int screenX, int screenY) {
-    Ray ray = camera.getPickRay(900, 450);
+    Ray ray = camera.getPickRay(960, 540);
 
     float distance = -1f;
 

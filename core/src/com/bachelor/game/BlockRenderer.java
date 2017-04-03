@@ -31,10 +31,10 @@ public class BlockRenderer {
   }
 
   private static void prepareTextures() {
-//    textureMap.put(BlockType.Gravel, new UVHolder(2, 0));
-//    textureMap.put(BlockType.Stone, new UVHolder(0, 1));
-    textureMap.put(BlockType.Stone, new UVHolder(13, 15));
-    textureMap.put(BlockType.Gravel, new UVHolder(13, 15));
+    textureMap.put(BlockType.Gravel, new UVHolder(2, 0));
+    textureMap.put(BlockType.Stone, new UVHolder(2, 0));
+//    textureMap.put(BlockType.Stone, new UVHolder(13, 15));
+//    textureMap.put(BlockType.Gravel, new UVHolder(13, 15));
   }
 
   public List<Mesh> renderChunk(List<Block> list) {
@@ -44,7 +44,6 @@ public class BlockRenderer {
 
     meshes = new LinkedList<Mesh>();
 
-//    meshBuilder.clear();
     meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.TextureCoordinates | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.Normal, GL20.GL_TRIANGLES);
 
     for (Block block : list) {

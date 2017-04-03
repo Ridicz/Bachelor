@@ -2,9 +2,9 @@ package com.bachelor.game;
 
 public class UVHolder {
 
-  private static final short imageWidth = 1280;
+  private static final short imageWidth = 4096;
 
-  private static final short imageHeight = 1280;
+  private static final short imageHeight = 4096;
 
   private static final short regionSize = 80;
 
@@ -17,10 +17,10 @@ public class UVHolder {
   private float v2;
 
   public UVHolder(int x, int y) {
-    u1 = (x * 80f) / imageWidth;
-    u2 = u1 + 80f / imageWidth;
-    v1 = (y * 80f) / imageHeight;
-    v2 = v1 + 80f /imageHeight;
+    u1 = (x * 256f) / imageWidth;
+    u2 = u1 + 256f / imageWidth;
+    v1 = (y * 256f) / imageHeight;
+    v2 = v1 + 256f /imageHeight;
   }
 
   public float getU1() {

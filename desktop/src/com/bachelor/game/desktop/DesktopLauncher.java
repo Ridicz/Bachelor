@@ -11,14 +11,15 @@ public class DesktopLauncher {
 
 	private static LwjglApplicationConfiguration createConfiguration() {
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-		config.width = 1366;
-		config.height = 800;
+		config.width = 1920;
+		config.height = 1080;
 		config.fullscreen = false;
 		config.resizable = false;
 		config.title = "Test Game";
 		config.vSyncEnabled = true;
 		config.foregroundFPS = 60;
 		config.backgroundFPS = -1;
+		config.samples = 8;
 
 		return config;
 	}

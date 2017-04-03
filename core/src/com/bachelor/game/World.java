@@ -33,8 +33,6 @@ public class World {
 
   private static ModelBuilder modelBuilder;
 
-  private static MeshBuilder meshBuilder;
-
   private Material material;
 
   private BlockRenderer blockRenderer;
@@ -45,7 +43,7 @@ public class World {
     chunkList = new ArrayList<Chunk>();
     meshList = new ArrayList<Mesh>();
     createTestMap();
-    material = new Material(TextureAttribute.createDiffuse(new Texture("atlas.jpg")));
+    material = new Material(TextureAttribute.createDiffuse(new Texture("assetshd.jpg")));
     blockRenderer = new BlockRenderer();
     AssetManager a = new AssetManager();
     a.load("skydome.g3db", Model.class);
@@ -67,57 +65,53 @@ public class World {
     World.modelBuilder = modelBuilder;
   }
 
-  public static void setMeshBuilder(MeshBuilder meshBuilder) {
-    World.meshBuilder = meshBuilder;
-  }
-
   private void createTestMap() {
-    for (int i = -16; i < 16; i++) {
-      for (int j = -16; j < 16; j++) {
-        chunkList.add(new Chunk(i, j));
-      }
-    }
+//    for (int i = -16; i < 16; i++) {
+//      for (int j = -16; j < 16; j++) {
+//        chunkList.add(new Chunk(i, j));
+//      }
+//    }
+//
+//    for (int i = 0; i < 128; i++) {
+//      for (Chunk chunk : chunkList) {
+//        chunk.setBlock(0, i, 15, BlockType.Gravel);
+//        chunk.setBlock(15, i, 0, BlockType.Stone);
+//        chunk.setBlock(0, i, 0, BlockType.Gravel);
+//        chunk.setBlock(15, i, 15, BlockType.Stone);
+//
+//        if (i < 16) {
+//          chunk.setBlock(0, 15, i, BlockType.Gravel);
+//          chunk.setBlock(i, 15, 0, BlockType.Stone);
+//          chunk.setBlock(i, 15, 15, BlockType.Gravel);
+//          chunk.setBlock(15, 15, i, BlockType.Stone);
+//
+//          chunk.setBlock(0, 31, i, BlockType.Gravel);
+//          chunk.setBlock(i, 31, 0, BlockType.Stone);
+//          chunk.setBlock(i, 31, 15, BlockType.Gravel);
+//          chunk.setBlock(15, 31, i, BlockType.Stone);
+//
+//          chunk.setBlock(0, 47, i, BlockType.Gravel);
+//          chunk.setBlock(i, 47, 0, BlockType.Stone);
+//          chunk.setBlock(i, 47, 15, BlockType.Gravel);
+//          chunk.setBlock(15, 47, i, BlockType.Stone);
+//
+//          chunk.setBlock(0, 63, i, BlockType.Gravel);
+//          chunk.setBlock(i, 63, 0, BlockType.Stone);
+//          chunk.setBlock(i, 63, 15, BlockType.Gravel);
+//          chunk.setBlock(15, 63, i, BlockType.Stone);
+//        }
+//      }
+//    }
+//
+//    for (int i = -5; i < 5; i++) {
+//      for (int j = -5; j < 5; j++) {
+//        chunkList.add(new Chunk(i, j));
+//      }
+//    }
 
-    for (int i = 0; i < 128; i++) {
-      for (Chunk chunk : chunkList) {
-        chunk.setBlock(0, i, 15, BlockType.Gravel);
-        chunk.setBlock(15, i, 0, BlockType.Stone);
-        chunk.setBlock(0, i, 0, BlockType.Gravel);
-        chunk.setBlock(15, i, 15, BlockType.Stone);
-
-        if (i < 16) {
-          chunk.setBlock(0, 15, i, BlockType.Gravel);
-          chunk.setBlock(i, 15, 0, BlockType.Stone);
-          chunk.setBlock(i, 15, 15, BlockType.Gravel);
-          chunk.setBlock(15, 15, i, BlockType.Stone);
-
-          chunk.setBlock(0, 31, i, BlockType.Gravel);
-          chunk.setBlock(i, 31, 0, BlockType.Stone);
-          chunk.setBlock(i, 31, 15, BlockType.Gravel);
-          chunk.setBlock(15, 31, i, BlockType.Stone);
-
-          chunk.setBlock(0, 47, i, BlockType.Gravel);
-          chunk.setBlock(i, 47, 0, BlockType.Stone);
-          chunk.setBlock(i, 47, 15, BlockType.Gravel);
-          chunk.setBlock(15, 47, i, BlockType.Stone);
-
-          chunk.setBlock(0, 63, i, BlockType.Gravel);
-          chunk.setBlock(i, 63, 0, BlockType.Stone);
-          chunk.setBlock(i, 63, 15, BlockType.Gravel);
-          chunk.setBlock(15, 63, i, BlockType.Stone);
-        }
-      }
-    }
-
-    for (int i = -5; i < 5; i++) {
-      for (int j = -5; j < 5; j++) {
-        chunkList.add(new Chunk(i, j));
-      }
-    }
-
-//    chunkList.add(new Chunk(0, 0));
-
-
+    chunkList.add(new Chunk(0, 0));
+//
+//
 //    Chunk chunk = new Chunk(0f, 0f);
 //
 //    chunk.setBlock(1, 0, 1, BlockType.Stone);
@@ -125,30 +119,30 @@ public class World {
 //    chunk.setBlock(2, 2, 0, BlockType.Stone);
 //    chunk.setBlock(3, 3, 0, BlockType.Stone);
 //    chunk.setBlock(4, 4, 0, BlockType.Stone);
-//
+
 //    chunkList.add(chunk);
 
 
-//    for (int i = 0; i < 3; i++) {
-//      for (int j = 1; j < 245; j++) {
-//        for (int k = 0; k < 3; k++) {
-////          chunkList.get(0).setBlock(i, j, k, BlockType.Gravel);
-////          chunkList.get(1).setBlock(i, j, k, BlockType.Gravel);
-////          chunkList.get(2).setBlock(i, j, k, BlockType.Gravel);
-////          chunkList.get(3).setBlock(i, j, k, BlockType.Gravel);
-//
-//          for (Chunk chunk : chunkList) {
-////            chunk.setBlock(0, j, 0, BlockType.Stone);
-////            chunk.setBlock(0, j, 15, BlockType.Stone);
-////            chunk.setBlock(15, j, 0, BlockType.Stone);
-////            chunk.setBlock(15, j, 15, BlockType.Stone);
-//
+    for (int i = 0; i < 16; i++) {
+      for (int j = 1; j < 245; j++) {
+        for (int k = 0; k < 16; k++) {
+//          chunkList.get(0).setBlock(i, j, k, BlockType.Gravel);
+//          chunkList.get(1).setBlock(i, j, k, BlockType.Gravel);
+//          chunkList.get(2).setBlock(i, j, k, BlockType.Gravel);
+//          chunkList.get(3).setBlock(i, j, k, BlockType.Gravel);
+
+          for (Chunk chunk : chunkList) {
+//            chunk.setBlock(0, j, 0, BlockType.Stone);
+//            chunk.setBlock(0, j, 15, BlockType.Stone);
+//            chunk.setBlock(15, j, 0, BlockType.Stone);
+//            chunk.setBlock(15, j, 15, BlockType.Stone);
+
 //            chunk.setBlock(i, j, k, BlockType.Stone);
-//            chunk.setBlock(i + 3, 1, k + 3, BlockType.Stone);
-//          }
-//        }
-//      }
-//    }
+            chunk.setBlock(i, 20, k, BlockType.Stone);
+          }
+        }
+      }
+    }
   }
 
   public Model render() {
