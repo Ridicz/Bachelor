@@ -11,9 +11,7 @@ import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class World {
 
@@ -31,6 +29,8 @@ public class World {
 
   private List<Mesh> meshList;
 
+  private Map<Chunk, List<Mesh>> map;
+
   private static ModelBuilder modelBuilder;
 
   private Material material;
@@ -42,6 +42,7 @@ public class World {
   private World() {
     chunkList = new ArrayList<Chunk>();
     meshList = new ArrayList<Mesh>();
+    map = new HashMap<Chunk, List<Mesh>>();
     createTestMap();
     material = new Material(TextureAttribute.createDiffuse(new Texture("assetshd.jpg")));
     blockRenderer = new BlockRenderer();
@@ -148,7 +149,16 @@ public class World {
   public Model render() {
     for (Chunk chunk : chunkList) {
       if (chunk.isChanged()) {
-        meshList.addAll(blockRenderer.renderChunk(chunk.getBlocks()));
+        if (map.get(chunk) != null) {
+          List list = map.remove(chunk);
+          list.clear();
+          list = null;
+        }
+
+        map.put(chunk, blockRenderer.renderChunk(chunk.getBlocks()));
+
+
+//        meshList.addAll(blockRenderer.renderChunk(chunk.getBlocks()));
       }
 
       chunk.setChanged(false);
@@ -156,8 +166,14 @@ public class World {
 
     modelBuilder.begin();
 
-    for (Mesh mesh : meshList) {
-      modelBuilder.part("World", mesh, GL20.GL_TRIANGLES, material);
+//    for (Mesh mesh : meshList) {
+//      modelBuilder.part("World", mesh, GL20.GL_TRIANGLES, material);
+//    }
+
+    for (List<Mesh> meshes : map.values()) {
+      for (Mesh mesh : meshes) {
+        modelBuilder.part("World", mesh, GL20.GL_TRIANGLES, material);
+      }
     }
 
     return modelBuilder.end();

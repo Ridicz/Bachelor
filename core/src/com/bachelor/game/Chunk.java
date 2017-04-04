@@ -100,4 +100,19 @@ public class Chunk {
 
     System.out.println("Destroyed");
   }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    Chunk chunk = (Chunk) o;
+
+    return startPosition.equals(chunk.startPosition);
+  }
+
+  @Override
+  public int hashCode() {
+    return startPosition.hashCode();
+  }
 }
