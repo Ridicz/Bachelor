@@ -18,31 +18,22 @@ public class BlockRenderer {
 
   private static Map<BlockType, UVHolder> textureMap = new HashMap<BlockType, UVHolder>();
 
-  private static float x, y, z;
-
   private UVHolder uvHolder;
 
-  private List<Mesh> meshes;
-
-  public static void setMeshBuilder(MeshBuilder meshBuilder) {
-    BlockRenderer.meshBuilder = meshBuilder;
-
+  public BlockRenderer() {
+    meshBuilder = new MeshBuilder();
     prepareTextures();
   }
 
   private static void prepareTextures() {
     textureMap.put(BlockType.Gravel, new UVHolder(2, 0));
-    textureMap.put(BlockType.Stone, new UVHolder(2, 0));
+    textureMap.put(BlockType.Stone, new UVHolder(7, 0));
 //    textureMap.put(BlockType.Stone, new UVHolder(13, 15));
 //    textureMap.put(BlockType.Gravel, new UVHolder(13, 15));
   }
 
   public List<Mesh> renderChunk(List<Block> list) {
-    if (meshes != null) {
-      meshes.clear();
-    }
-
-    meshes = new LinkedList<Mesh>();
+    List<Mesh> meshes = new LinkedList<Mesh>();
 
     meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.TextureCoordinates | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.Normal, GL20.GL_TRIANGLES);
 
@@ -63,9 +54,9 @@ public class BlockRenderer {
   }
 
   private void renderBlock(Block block) {
-    x = block.getPosition().getX();
-    y = block.getPosition().getY();
-    z = block.getPosition().getZ();
+    float x = block.getPosition().getX();
+    float y = block.getPosition().getY();
+    float z = block.getPosition().getZ();
 
     uvHolder = textureMap.get(block.getBlockType());
 
@@ -77,29 +68,5 @@ public class BlockRenderer {
     meshBuilder.rect(x + SIZE, y + SIZE, z, x + SIZE, y + SIZE, z + SIZE, x + SIZE, y, z + SIZE, x + SIZE, y, z, 0f, 0f, 0f);
     meshBuilder.rect(x, y + SIZE, z, x, y + SIZE, z + SIZE, x + SIZE, y + SIZE, z + SIZE, x + SIZE, y + SIZE, z, 0f, 0f, 0f);
     meshBuilder.rect(x + SIZE, y, z, x + SIZE, y, z + SIZE, x, y, z + SIZE, x, y, z, 0f, 0f, 0f);
-  }
-
-  private void renderTop() {
-    meshBuilder.rect(x, y + SIZE, z, x, y + SIZE, z + SIZE, x + SIZE, y + SIZE, z + SIZE, x + SIZE, y + SIZE, z, 0f, 0f, 0f);
-  }
-
-  private void renderBottom() {
-    meshBuilder.rect(x + SIZE, y, z, x + SIZE, y, z + SIZE, x, y, z + SIZE, x, y, z, 0f, 0f, 0f);
-  }
-
-  private void renderNorth() {
-    meshBuilder.rect(x + SIZE, y + SIZE, z, x + SIZE, y + SIZE, z + SIZE, x + SIZE, y, z + SIZE, x + SIZE, y, z, 0f, 0f, 0f);
-  }
-
-  private void renderSouth() {
-    meshBuilder.rect(x, y, z, x, y, z + SIZE, x, y + SIZE, z + SIZE, x, y + SIZE, z, 0f, 0f, 0f);
-  }
-
-  private void renderEast() {
-    meshBuilder.rect(x, y, z + SIZE, x + SIZE, y, z + SIZE, x + SIZE, y + SIZE, z + SIZE, x, y + SIZE, z + SIZE, 0f, 0f, 0f);
-  }
-
-  private void renderWest() {
-    meshBuilder.rect(x, y + SIZE, z, x + SIZE, y + SIZE, z, x + SIZE, y, z, x, y, z,0f, 0f, 0f);
   }
 }

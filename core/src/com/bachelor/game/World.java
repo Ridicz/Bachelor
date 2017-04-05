@@ -8,10 +8,12 @@ import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
-import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class World {
 
@@ -27,8 +29,6 @@ public class World {
 
   private List<Chunk> chunkList;
 
-  private List<Mesh> meshList;
-
   private Map<Chunk, List<Mesh>> map;
 
   private static ModelBuilder modelBuilder;
@@ -40,8 +40,8 @@ public class World {
   private ModelInstance skydome;
 
   private World() {
+    modelBuilder = new ModelBuilder();
     chunkList = new ArrayList<Chunk>();
-    meshList = new ArrayList<Mesh>();
     map = new HashMap<Chunk, List<Mesh>>();
     createTestMap();
     material = new Material(TextureAttribute.createDiffuse(new Texture("assetshd.jpg")));
@@ -62,13 +62,9 @@ public class World {
     return instance;
   }
 
-  public static void setModelBuilder(ModelBuilder modelBuilder) {
-    World.modelBuilder = modelBuilder;
-  }
-
   private void createTestMap() {
-//    for (int i = -16; i < 16; i++) {
-//      for (int j = -16; j < 16; j++) {
+//    for (int i = -1; i < 1; i++) {
+//      for (int j = -1; j < 1; j++) {
 //        chunkList.add(new Chunk(i, j));
 //      }
 //    }
@@ -110,40 +106,30 @@ public class World {
 //      }
 //    }
 
-    chunkList.add(new Chunk(0, 0));
-//
-//
-//    Chunk chunk = new Chunk(0f, 0f);
-//
-//    chunk.setBlock(1, 0, 1, BlockType.Stone);
-//    chunk.setBlock(1, 1, 0, BlockType.Stone);
-//    chunk.setBlock(2, 2, 0, BlockType.Stone);
-//    chunk.setBlock(3, 3, 0, BlockType.Stone);
-//    chunk.setBlock(4, 4, 0, BlockType.Stone);
-
-//    chunkList.add(chunk);
-
+    Chunk chunk = new Chunk(0f, 0f);
+    Chunk chunk2 = new Chunk(0f, 1f);
+    Chunk chunk3 = new Chunk(-1f, 0f);
+    Chunk chunk4 = new Chunk(1f, 0f);
+    Chunk chunk5 = new Chunk(0f, -1f);
 
     for (int i = 0; i < 16; i++) {
-      for (int j = 1; j < 245; j++) {
-        for (int k = 0; k < 16; k++) {
-//          chunkList.get(0).setBlock(i, j, k, BlockType.Gravel);
-//          chunkList.get(1).setBlock(i, j, k, BlockType.Gravel);
-//          chunkList.get(2).setBlock(i, j, k, BlockType.Gravel);
-//          chunkList.get(3).setBlock(i, j, k, BlockType.Gravel);
+      for (int j = 0; j < 16; j++) {
+        chunk.setBlock(i, 0, j, BlockType.Stone);
 
-          for (Chunk chunk : chunkList) {
-//            chunk.setBlock(0, j, 0, BlockType.Stone);
-//            chunk.setBlock(0, j, 15, BlockType.Stone);
-//            chunk.setBlock(15, j, 0, BlockType.Stone);
-//            chunk.setBlock(15, j, 15, BlockType.Stone);
-
-//            chunk.setBlock(i, j, k, BlockType.Stone);
-            chunk.setBlock(i, 20, k, BlockType.Stone);
-          }
+        for (int k = 0; k < 256; k++) {
+          chunk2.setBlock(i, k, j, BlockType.Stone);
+          chunk3.setBlock(i, k, j, BlockType.Stone);
+          chunk4.setBlock(i, k, j, BlockType.Stone);
+          chunk5.setBlock(i, k, j, BlockType.Stone);
         }
       }
     }
+
+    chunkList.add(chunk);
+    chunkList.add(chunk2);
+    chunkList.add(chunk3);
+    chunkList.add(chunk4);
+    chunkList.add(chunk5);
   }
 
   public Model render() {
@@ -152,23 +138,17 @@ public class World {
         if (map.get(chunk) != null) {
           List list = map.remove(chunk);
           list.clear();
-          list = null;
         }
 
         map.put(chunk, blockRenderer.renderChunk(chunk.getBlocks()));
 
+        chunk.setChanged(false);
 
-//        meshList.addAll(blockRenderer.renderChunk(chunk.getBlocks()));
+        System.out.println(map.values().size());
       }
-
-      chunk.setChanged(false);
     }
 
     modelBuilder.begin();
-
-//    for (Mesh mesh : meshList) {
-//      modelBuilder.part("World", mesh, GL20.GL_TRIANGLES, material);
-//    }
 
     for (List<Mesh> meshes : map.values()) {
       for (Mesh mesh : meshes) {

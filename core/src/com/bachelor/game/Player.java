@@ -2,7 +2,10 @@ package com.bachelor.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
-import com.badlogic.gdx.math.*;
+import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Quaternion;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.Ray;
 
 public class Player {
@@ -13,7 +16,9 @@ public class Player {
 
   public static final float CAMERA_HEIGHT = 1.6f;
 
-  private static final float WALK_SPEED = 0.15f;
+  private static final float WALK_SPEED = 0.2f;
+
+  private static final float ACCELERATION = 0.02f;
 
   private Position position;
 
@@ -25,12 +30,12 @@ public class Player {
 
   private PerspectiveCamera camera;
 
-  private float velocity;
+  private float horizontalVelocity = 0f;
 
   private float verticalVelocity = 0f;
 
   public Player(PerspectiveCamera camera) {
-    this(camera, new Position(1, 50, 1), new Rotation());
+    this(camera, new Position(1, 2, 1), new Rotation());
   }
 
   public Player(PerspectiveCamera camera, Position position) {
@@ -68,32 +73,30 @@ public class Player {
   }
 
   public void move(Direction direction) {
-//    if (!isOnGround()) {
-//      return;
-//    }
+    horizontalVelocity = Math.min(WALK_SPEED, horizontalVelocity + ACCELERATION);
 
-    Vector2 vec =  new Vector2();
+    Vector2 moveVector =  new Vector2();
 
     switch (direction) {
       case Left:
-        vec.set(0f, -WALK_SPEED);
+        moveVector.set(0f, -horizontalVelocity);
         break;
 
       case Right:
-        vec.set(0f, WALK_SPEED);
+        moveVector.set(0f, horizontalVelocity);
         break;
 
       case Forward:
-        vec.set(WALK_SPEED, 0f);
+        moveVector.set(horizontalVelocity, 0f);
         break;
 
       case Backward:
-        vec.set(-WALK_SPEED, 0f);
+        moveVector.set(-horizontalVelocity, 0f);
         break;
     }
 
     Vector2 velocity = new Vector2();
-    velocity.set(vec.x, vec.y);
+    velocity.set(moveVector.x, moveVector.y);
 
     Vector2 rot = new Vector2(camera.direction.x, camera.direction.z);
 
@@ -103,7 +106,7 @@ public class Player {
   }
 
   private boolean isOnGround() {
-    if (verticalVelocity > 0 || getCurrentChunk().getBlock(position) == null) {
+    if (verticalVelocity > 0f || getCurrentChunk().getBlock(position) == null) {
       return false;
     }
 
@@ -124,11 +127,11 @@ public class Player {
 
     camera.direction.prj(mat);
 
-    if (camera.direction.y >= -0.985f && pitch > 0) {
+    if (camera.direction.y >= -0.995f && pitch > 0) {
       camera.direction.rotate(vec.crs(camera.up), -pitch);
     }
 
-    if (camera.direction.y <= 0.985f && pitch < 0) {
+    if (camera.direction.y <= 0.995f && pitch < 0) {
       camera.direction.rotate(vec.crs(camera.up), -pitch);
     }
   }
@@ -143,6 +146,10 @@ public class Player {
     if (!isOnGround()) {
       position.move(0f, 0.2f * verticalVelocity, 0f);
       verticalVelocity = Math.max(-2f, verticalVelocity - 0.04f);
+    } else {
+      if (horizontalVelocity > 0f) {
+        horizontalVelocity -= ACCELERATION / 2;
+      }
     }
 
     camera.position.set(position.getX(), position.getY() + CAMERA_HEIGHT, position.getZ());
@@ -156,14 +163,7 @@ public class Player {
     Block block = getTargetBlock(screenX, screenY);
 
     if (block != null) {
-      //Gdx.graphics.setTitle(block.toString());
-
-      System.out.println(block.getPosition().getPosition());
-
       getCurrentChunk().destroyBlock(block);
-
-    } else {
-      Gdx.graphics.setTitle("Null");
     }
   }
 
@@ -176,13 +176,14 @@ public class Player {
 
     for (Block block : getCurrentChunk().getBlocks()) {
       Position position = new Position(block.getPosition().getX() + 0.5f, block.getPosition().getY() + 0.5f, block.getPosition().getZ() + 0.5f);
-      float len = ray.direction.dot(position.getX() - ray.origin.x, position.getY() - ray.origin.y, position.getY() - ray.origin.z);
+
+      float len = ray.direction.dot(position.getX() - ray.origin.x, position.getY() - ray.origin.y, position.getZ() - ray.origin.z);
 
       if (len < 0f) {
         continue;
       }
 
-      float dist2 = position.getPosition().dst2(ray.origin.x+ray.direction.x*len, ray.origin.y+ray.direction.y*len, ray.origin.z+ray.direction.z*len);
+      float dist2 = position.getPosition().dst2(ray.origin.x + ray.direction.x * len, ray.origin.y + ray.direction.y * len, ray.origin.z + ray.direction.z * len);
 
       if (distance >= 0f && dist2 > distance) {
         continue;
