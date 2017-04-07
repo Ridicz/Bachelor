@@ -26,6 +26,18 @@ public class Position {
     return position.z;
   }
 
+  public void setX(float x) {
+    position.x = x;
+  }
+
+  public void setY(float y) {
+    position.y = y;
+  }
+
+  public void setZ(float z) {
+    position.z = z;
+  }
+
   public void move(float x, float y, float z) {
     position.add(x, y, z);
   }

@@ -39,7 +39,7 @@ public class World {
 
   private ModelInstance skydome;
 
-  private World() {
+  public World() {
     modelBuilder = new ModelBuilder();
     chunkList = new ArrayList<Chunk>();
     map = new HashMap<Chunk, List<Mesh>>();
@@ -51,24 +51,32 @@ public class World {
     a.finishLoading();
 
     skydome = new ModelInstance(a.get("skydome.g3db", Model.class));
-  }
 
-  public static World getInstance() {
-    if (instance == null) {
-      instance = new World();
-      return instance;
-    }
-
-    return instance;
+    instance = this;
   }
 
   private void createTestMap() {
-//    for (int i = -1; i < 1; i++) {
-//      for (int j = -1; j < 1; j++) {
-//        chunkList.add(new Chunk(i, j));
-//      }
-//    }
-//
+    for (int i = -5; i < 5; i++) {
+      for (int j = -5; j < 5; j++) {
+        chunkList.add(new Chunk(i, j));
+      }
+    }
+
+    int counter = 0;
+
+    for (int i = 0; i < 16; i++) {
+      for (int j = 0; j < 16; j++) {
+        for (int k = 0; k < 10; k++) {
+          for (Chunk chunk : chunkList) {
+            chunk.setBlock(i, k, j, BlockType.Stone);
+            counter++;
+          }
+        }
+      }
+    }
+
+    System.out.println(counter);
+
 //    for (int i = 0; i < 128; i++) {
 //      for (Chunk chunk : chunkList) {
 //        chunk.setBlock(0, i, 15, BlockType.Gravel);
@@ -106,30 +114,26 @@ public class World {
 //      }
 //    }
 
-    Chunk chunk = new Chunk(0f, 0f);
-    Chunk chunk2 = new Chunk(0f, 1f);
-    Chunk chunk3 = new Chunk(-1f, 0f);
-    Chunk chunk4 = new Chunk(1f, 0f);
-    Chunk chunk5 = new Chunk(0f, -1f);
+//    for (int i = -3; i < 5; i++) {
+//      for (int j = -3; j < 5; j++) {
+//        chunkList.add(new Chunk(i, j));
+//      }
+//    }
+//
+//    int p = 0;
+//
+//    for (int i = 0; i < 16; i++) {
+//      for (int j = 0; j < 16; j++) {
+//        for (int k = 0; k < 100; k++) {
+//          for (Chunk chunk : chunkList) {
+//            chunk.setBlock(i, k, j, BlockType.Gravel);
+//            p++;
+//          }
+//        }
+//      }
+//    }
 
-    for (int i = 0; i < 16; i++) {
-      for (int j = 0; j < 16; j++) {
-        chunk.setBlock(i, 0, j, BlockType.Stone);
-
-        for (int k = 0; k < 256; k++) {
-          chunk2.setBlock(i, k, j, BlockType.Stone);
-          chunk3.setBlock(i, k, j, BlockType.Stone);
-          chunk4.setBlock(i, k, j, BlockType.Stone);
-          chunk5.setBlock(i, k, j, BlockType.Stone);
-        }
-      }
-    }
-
-    chunkList.add(chunk);
-    chunkList.add(chunk2);
-    chunkList.add(chunk3);
-    chunkList.add(chunk4);
-    chunkList.add(chunk5);
+//    System.out.println("Lama: " + p);
   }
 
   public Model render() {

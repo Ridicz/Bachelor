@@ -1,6 +1,6 @@
 package com.bachelor.game;
 
-import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.collision.BoundingBox;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -29,14 +29,6 @@ public class Chunk {
     blocks = new HashMap<Position, Block>(4096);
     changed = true;
   }
-
-//  public Block getBlock(int x, int y, int z) {
-//    int indexX = x / 16;
-//    int indexY = y / 16;
-//    int indexZ = z / 16;
-//
-//    return storage[indexX][indexY][indexZ];
-//  }
 
   public Position getStartPosition() {
     return startPosition;
@@ -94,11 +86,15 @@ public class Chunk {
     System.out.println(blocks.get(position));
     Block temp = blocks.remove(position);
 
-    System.out.println(blocks.get(position));
+    System.out.println("Destroyed: " + blocks.get(position));
 
     changed = true;
+  }
 
-    System.out.println("Destroyed");
+  public boolean isVisible() {
+    BoundingBox boundingBox = new BoundingBox(getStartPosition().getPosition(), getEndPosition().getPosition());
+
+    return BachelorClient.getInstance().getCamera().frustum.boundsInFrustum(boundingBox);
   }
 
   @Override

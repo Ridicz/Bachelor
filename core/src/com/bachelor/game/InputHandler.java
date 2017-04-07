@@ -9,7 +9,7 @@ import java.util.Set;
 
 public class InputHandler implements InputProcessor {
 
-  private static final float MOUSE_SENSITIVITY = 0.2f;
+  private static final float MOUSE_SENSITIVITY = 0.18f;
 
   private Set<Integer> pressedKeys;
 
@@ -42,7 +42,7 @@ public class InputHandler implements InputProcessor {
   @Override
   public boolean touchDown(int screenX, int screenY, int pointer, int button) {
     if (button == 0) {
-      player.action(screenX, screenY);
+      player.action(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
     }
 
     return false;

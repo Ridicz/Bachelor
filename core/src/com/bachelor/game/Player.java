@@ -1,6 +1,5 @@
 package com.bachelor.game;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Quaternion;
@@ -34,8 +33,10 @@ public class Player {
 
   private float verticalVelocity = 0f;
 
+  private Vector2 jumpDirection = new Vector2();
+
   public Player(PerspectiveCamera camera) {
-    this(camera, new Position(1, 2, 1), new Rotation());
+    this(camera, new Position(1, 14, 1), new Rotation());
   }
 
   public Player(PerspectiveCamera camera, Position position) {
@@ -73,6 +74,10 @@ public class Player {
   }
 
   public void move(Direction direction) {
+    if (!isOnGround()) {
+      return;
+    }
+
     horizontalVelocity = Math.min(WALK_SPEED, horizontalVelocity + ACCELERATION);
 
     Vector2 moveVector =  new Vector2();
@@ -102,6 +107,8 @@ public class Player {
 
     velocity.rotate(rot.angle());
 
+    jumpDirection.set(velocity);
+
     position.move(velocity.x, 0f, velocity.y);
   }
 
@@ -111,6 +118,7 @@ public class Player {
     }
 
     verticalVelocity = 0f;
+    position.setY(getCurrentChunk().getBlock(position).getPosition().getY() + 0.99f);
 
     return true;
   }
@@ -144,12 +152,14 @@ public class Player {
 
   public void update() {
     if (!isOnGround()) {
-      position.move(0f, 0.2f * verticalVelocity, 0f);
+      position.move(jumpDirection.x, 0.2f * verticalVelocity, jumpDirection.y);
       verticalVelocity = Math.max(-2f, verticalVelocity - 0.04f);
     } else {
       if (horizontalVelocity > 0f) {
         horizontalVelocity -= ACCELERATION / 2;
       }
+
+      jumpDirection.setZero();
     }
 
     camera.position.set(position.getX(), position.getY() + CAMERA_HEIGHT, position.getZ());
@@ -168,7 +178,7 @@ public class Player {
   }
 
   private Block getTargetBlock(int screenX, int screenY) {
-    Ray ray = camera.getPickRay(960, 540);
+    Ray ray = camera.getPickRay(screenX, screenY);
 
     float distance = -1f;
 
@@ -189,7 +199,7 @@ public class Player {
         continue;
       }
 
-      if (dist2 <= 1f) {
+      if (dist2 <= 0.5f) {
         result = block;
         distance = dist2;
       }

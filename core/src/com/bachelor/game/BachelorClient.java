@@ -28,15 +28,22 @@ public class BachelorClient extends ApplicationAdapter {
 
 	private World world;
 
+	private static BachelorClient gameInstance;
+
+	public static BachelorClient getInstance() {
+		return gameInstance;
+	}
+
 	@Override
 	public void create () {
-		world = World.getInstance();
+		world = new World();
 		initCamera();
 		renderer = new Renderer(this);
 		player = new Player(camera);
 		inputHandler = new InputHandler(player);
 		Gdx.input.setInputProcessor(inputHandler);
 		Gdx.input.setCursorCatched(true);
+		gameInstance = this;
 	}
 
 	private void initCamera() {
