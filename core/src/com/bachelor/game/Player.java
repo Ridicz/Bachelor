@@ -1,11 +1,10 @@
 package com.bachelor.game;
 
 import com.badlogic.gdx.graphics.PerspectiveCamera;
-import com.badlogic.gdx.math.Matrix4;
-import com.badlogic.gdx.math.Quaternion;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.math.collision.Ray;
+
+import java.util.TreeMap;
 
 public class Player {
 
@@ -36,7 +35,7 @@ public class Player {
   private Vector2 jumpDirection = new Vector2();
 
   public Player(PerspectiveCamera camera) {
-    this(camera, new Position(1, 14, 1), new Rotation());
+    this(camera, new Position(1f, 210f, 1f), new Rotation());
   }
 
   public Player(PerspectiveCamera camera, Position position) {
@@ -184,10 +183,18 @@ public class Player {
 
     Block result = null;
 
+    TreeMap<Float, Vector3> map = new TreeMap<Float, Vector3>();
+
     for (Block block : getCurrentChunk().getBlocks()) {
       Position position = new Position(block.getPosition().getX() + 0.5f, block.getPosition().getY() + 0.5f, block.getPosition().getZ() + 0.5f);
 
       float len = ray.direction.dot(position.getX() - ray.origin.x, position.getY() - ray.origin.y, position.getZ() - ray.origin.z);
+
+      if (Intersector.intersectRayBoundsFast(ray, block.getPosition().getPosition(), new Vector3(1f, 1f, 1f))) {
+
+      }
+
+      map.put(len, position.getPosition());
 
       if (len < 0f) {
         continue;
@@ -199,7 +206,7 @@ public class Player {
         continue;
       }
 
-      if (dist2 <= 0.5f) {
+      if (dist2 <= 0.25f) {
         result = block;
         distance = dist2;
       }

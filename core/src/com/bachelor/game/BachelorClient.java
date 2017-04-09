@@ -2,8 +2,6 @@ package com.bachelor.game;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Graphics;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -36,13 +34,13 @@ public class BachelorClient extends ApplicationAdapter {
 
 	@Override
 	public void create () {
-		world = new World();
 		initCamera();
 		renderer = new Renderer(this);
 		player = new Player(camera);
 		inputHandler = new InputHandler(player);
 		Gdx.input.setInputProcessor(inputHandler);
 		Gdx.input.setCursorCatched(true);
+		world = new World();
 		gameInstance = this;
 	}
 

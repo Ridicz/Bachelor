@@ -2,6 +2,10 @@ package com.bachelor.game;
 
 public class Block extends Item {
 
+  private static int currentId = 0;
+
+  private final int blockId;
+
   private BlockType blockType;
 
   private Position position;
@@ -10,11 +14,7 @@ public class Block extends Item {
     super();
     this.position = position;
     this.blockType = blockType;
-  }
-
-  public Block(Position position) {
-    super();
-    this.position = position;
+    this.blockId = currentId++;
   }
 
   public Position getPosition() {
@@ -25,6 +25,10 @@ public class Block extends Item {
     return blockType;
   }
 
+  public int getBlockId() {
+    return blockId;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -32,11 +36,11 @@ public class Block extends Item {
 
     Block block = (Block) o;
 
-    return position.equals(block.position);
+    return blockId == block.blockId;
   }
 
   @Override
   public int hashCode() {
-    return position.hashCode();
+    return blockId;
   }
 }
