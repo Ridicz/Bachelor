@@ -37,48 +37,48 @@ public class World {
 
   private void createTestMap() {
 
-    for (int i = -5; i < 5; i++) {
-      for (int j = -5; j < 5; j++) {
-        chunkList.add(new Chunk(i, j));
-      }
-    }
-
-    int counter = 0;
-
-    for (int l = -5; l < 5; l++) {
-      for (int m = -5; m < 5; m++) {
-        for (int i = 0; i < 16; i++) {
-          for (int j = 0; j < 16; j++) {
-            for (int k = 0; k < 120 + l * 10; k++) {
-              chunkList.get(counter).setBlock(i, k, j, BlockType.Stone);
-            }
-          }
-        }
-
-        ++counter;
-      }
-    }
-
-//------------------------------------------------
-//    for (int i = 0; i < 5; i++) {
-//      for (int j = 0; j < 5; j++) {
+//    for (int i = -5; i < 5; i++) {
+//      for (int j = -5; j < 5; j++) {
 //        chunkList.add(new Chunk(i, j));
 //      }
 //    }
 //
 //    int counter = 0;
 //
-//    for (Chunk chunk : chunkList) {
-//      for (int i = 0; i < 16; i++) {
-//        for (int j = 0; j < i; j++) {
-//          for (int k = 0; k < 16; k++) {
-//            chunk.setBlock(i, j, k, BlockType.Stone);
+//    for (int l = -5; l < 5; l++) {
+//      for (int m = -5; m < 5; m++) {
+//        for (int i = 0; i < 16; i++) {
+//          for (int j = 0; j < 16; j++) {
+//            for (int k = 0; k < 120 + l * 10; k++) {
+//              chunkList.get(counter).setBlock(i, k, j, BlockType.Stone);
+//            }
 //          }
 //        }
-//      }
 //
-//      Gdx.app.log("World", "Created " + ++counter + "/" + chunkList.size() + " chunk.");
+//        ++counter;
+//      }
 //    }
+
+//------------------------------------------------
+    for (int i = 0; i < 5; i++) {
+      for (int j = 0; j < 5; j++) {
+        chunkList.add(new Chunk(i, j));
+      }
+    }
+
+    int counter = 0;
+
+    for (Chunk chunk : chunkList) {
+      for (int i = 0; i < 16; i++) {
+        for (int j = 0; j < i; j++) {
+          for (int k = 0; k < 16; k++) {
+            chunk.setBlock(i, j, k, BlockType.Stone);
+          }
+        }
+      }
+
+      Gdx.app.log("World", "Created " + ++counter + "/" + chunkList.size() + " chunk.");
+    }
 //--------------------------------------------------
 //    chunkList.add(new Chunk(0, 0));
 //

@@ -35,7 +35,7 @@ public class Player {
   private Vector2 jumpDirection = new Vector2();
 
   public Player(PerspectiveCamera camera) {
-    this(camera, new Position(1f, 210f, 1f), new Rotation());
+    this(camera, new Position(1f, 30f, 1f), new Rotation());
   }
 
   public Player(PerspectiveCamera camera, Position position) {

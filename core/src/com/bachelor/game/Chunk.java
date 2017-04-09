@@ -161,6 +161,7 @@ public class Chunk {
     meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.TextureCoordinates | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.Normal, GL20.GL_TRIANGLES);
 
     for (Mesh mesh1 : visibleBlocks.values()) {
+      System.out.println(visibleBlocks.size());
 //      if (meshBuilder.getNumVertices() < Short.MAX_VALUE)
         meshBuilder.addMesh(mesh1);
     }
