@@ -37,6 +37,23 @@ public class World {
 
   private void createTestMap() {
 
+    chunkList.add(new Chunk(1, 0));
+    chunkList.add(new Chunk(0, 1));
+    chunkList.add(new Chunk(1, 1));
+    chunkList.add(new Chunk(0, 0));
+
+      for (int i = 1; i < 15; i++) {
+        for (int j = 1; j < 15; j++) {
+          for (int k = 0; k < 60; k++) {
+            for (Chunk chunk : chunkList) {
+              chunk.setBlock(i, 60, j, BlockType.Stone);
+              chunk.setBlock(i, 10, j, BlockType.Stone);
+            }
+          }
+        }
+      }
+//------------------------------------------------------------------
+
 //    for (int i = -5; i < 5; i++) {
 //      for (int j = -5; j < 5; j++) {
 //        chunkList.add(new Chunk(i, j));
@@ -60,25 +77,25 @@ public class World {
 //    }
 
 //------------------------------------------------
-    for (int i = 0; i < 5; i++) {
-      for (int j = 0; j < 5; j++) {
-        chunkList.add(new Chunk(i, j));
-      }
-    }
-
-    int counter = 0;
-
-    for (Chunk chunk : chunkList) {
-      for (int i = 0; i < 16; i++) {
-        for (int j = 0; j < i; j++) {
-          for (int k = 0; k < 16; k++) {
-            chunk.setBlock(i, j, k, BlockType.Stone);
-          }
-        }
-      }
-
-      Gdx.app.log("World", "Created " + ++counter + "/" + chunkList.size() + " chunk.");
-    }
+//    for (int i = 0; i < 5; i++) {
+//      for (int j = 0; j < 5; j++) {
+//        chunkList.add(new Chunk(i, j));
+//      }
+//    }
+//
+//    int counter = 0;
+//
+//    for (Chunk chunk : chunkList) {
+//      for (int i = 0; i < 16; i++) {
+//        for (int j = 0; j < i; j++) {
+//          for (int k = 0; k < 16; k++) {
+//            chunk.setBlock(i, j, k, BlockType.Stone);
+//          }
+//        }
+//      }
+//
+//      Gdx.app.log("World", "Created " + ++counter + "/" + chunkList.size() + " chunk.");
+//    }
 //--------------------------------------------------
 //    chunkList.add(new Chunk(0, 0));
 //

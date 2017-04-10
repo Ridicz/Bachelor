@@ -1,7 +1,10 @@
 package com.bachelor.game;
 
 import com.badlogic.gdx.graphics.PerspectiveCamera;
-import com.badlogic.gdx.math.*;
+import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Quaternion;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.Ray;
 
 import java.util.TreeMap;
@@ -35,17 +38,13 @@ public class Player {
   private Vector2 jumpDirection = new Vector2();
 
   public Player(PerspectiveCamera camera) {
-    this(camera, new Position(1f, 30f, 1f), new Rotation());
+    this(camera, new Position(8f, 80f, 8f));
   }
 
   public Player(PerspectiveCamera camera, Position position) {
-    this(camera, position, new Rotation());
-  }
-
-  public Player(PerspectiveCamera camera, Position position, Rotation rotation) {
     this.camera = camera;
     this.position = position;
-    this.rotation = rotation;
+    this.rotation = new Rotation();
   }
 
   public Position getPosition() {
@@ -183,18 +182,12 @@ public class Player {
 
     Block result = null;
 
-    TreeMap<Float, Vector3> map = new TreeMap<Float, Vector3>();
+    TreeMap<Float, Block> map = new TreeMap<Float, Block>();
 
     for (Block block : getCurrentChunk().getBlocks()) {
       Position position = new Position(block.getPosition().getX() + 0.5f, block.getPosition().getY() + 0.5f, block.getPosition().getZ() + 0.5f);
 
       float len = ray.direction.dot(position.getX() - ray.origin.x, position.getY() - ray.origin.y, position.getZ() - ray.origin.z);
-
-      if (Intersector.intersectRayBoundsFast(ray, block.getPosition().getPosition(), new Vector3(1f, 1f, 1f))) {
-
-      }
-
-      map.put(len, position.getPosition());
 
       if (len < 0f) {
         continue;
@@ -206,11 +199,17 @@ public class Player {
         continue;
       }
 
-      if (dist2 <= 0.25f) {
+      if (dist2 <= 1f) {
+        float dist = this.position.getPosition().dst(position.getPosition());
+
+        map.put(dist, block);
+
         result = block;
         distance = dist2;
       }
     }
+
+//    return (Block) map.values().toArray()[0];
 
     return result;
   }
