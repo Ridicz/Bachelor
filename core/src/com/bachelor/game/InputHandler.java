@@ -16,7 +16,7 @@ public class InputHandler implements InputProcessor {
   private Player player;
 
   public InputHandler(Player player) {
-    pressedKeys = new HashSet<Integer>();
+    pressedKeys = new HashSet<>();
     this.player = player;
   }
 

@@ -20,7 +20,8 @@ public class Block extends Item {
     this.position = position;
     this.blockType = blockType;
     this.blockId = currentId++;
-    this.visibleSides = new HashSet<Side>();
+    this.visibleSides = new HashSet<>();
+    System.out.println(blockId);
   }
 
   public Position getPosition() {

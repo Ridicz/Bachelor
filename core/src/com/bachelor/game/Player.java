@@ -182,7 +182,7 @@ public class Player {
 
     Block result = null;
 
-    TreeMap<Float, Block> map = new TreeMap<Float, Block>();
+    TreeMap<Float, Block> map = new TreeMap<>();
 
     for (Block block : getCurrentChunk().getBlocks()) {
       Position position = new Position(block.getPosition().getX() + 0.5f, block.getPosition().getY() + 0.5f, block.getPosition().getZ() + 0.5f);
