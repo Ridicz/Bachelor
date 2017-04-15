@@ -21,7 +21,7 @@ public class Player {
 
   private static final float ACCELERATION = 0.02f;
 
-  private Position position;
+  private Vector3 position;
 
   private Rotation rotation;
 
@@ -38,20 +38,20 @@ public class Player {
   private Vector2 jumpDirection = new Vector2();
 
   public Player(PerspectiveCamera camera) {
-    this(camera, new Position(8f, 80f, 8f));
+    this(camera, new Vector3(8f, 80f, 8f));
   }
 
-  public Player(PerspectiveCamera camera, Position position) {
+  public Player(PerspectiveCamera camera, Vector3 position) {
     this.camera = camera;
     this.position = position;
     this.rotation = new Rotation();
   }
 
-  public Position getPosition() {
+  public Vector3 getPosition() {
     return position;
   }
 
-  public void setPosition(Position position) {
+  public void setPosition(Vector3 position) {
     this.position = position;
   }
 
@@ -107,7 +107,7 @@ public class Player {
 
     jumpDirection.set(velocity);
 
-    position.move(velocity.x, 0f, velocity.y);
+    position.add(velocity.x, 0f, velocity.y);
   }
 
   private boolean isOnGround() {
@@ -116,7 +116,7 @@ public class Player {
     }
 
     verticalVelocity = 0f;
-    position.setY(getCurrentChunk().getBlock(position).getPosition().getY() + 0.99f);
+    position.y = getCurrentChunk().getBlock(position).getPosition().getY() + 0.99f;
 
     return true;
   }
@@ -150,7 +150,7 @@ public class Player {
 
   public void update() {
     if (!isOnGround()) {
-      position.move(jumpDirection.x, 0.2f * verticalVelocity, jumpDirection.y);
+      position.add(jumpDirection.x, 0.2f * verticalVelocity, jumpDirection.y);
       verticalVelocity = Math.max(-2f, verticalVelocity - 0.04f);
     } else {
       if (horizontalVelocity > 0f) {
@@ -160,7 +160,7 @@ public class Player {
       jumpDirection.setZero();
     }
 
-    camera.position.set(position.getX(), position.getY() + CAMERA_HEIGHT, position.getZ());
+    camera.position.set(position.x, position.y + CAMERA_HEIGHT, position.z);
   }
 
   public Chunk getCurrentChunk() {
@@ -185,22 +185,22 @@ public class Player {
     TreeMap<Float, Block> map = new TreeMap<>();
 
     for (Block block : getCurrentChunk().getBlocks()) {
-      Position position = new Position(block.getPosition().getX() + 0.5f, block.getPosition().getY() + 0.5f, block.getPosition().getZ() + 0.5f);
+      Vector3 position = new Vector3(block.getPosition().getX() + 0.5f, block.getPosition().getY() + 0.5f, block.getPosition().getZ() + 0.5f);
 
-      float len = ray.direction.dot(position.getX() - ray.origin.x, position.getY() - ray.origin.y, position.getZ() - ray.origin.z);
+      float len = ray.direction.dot(position.x - ray.origin.x, position.y - ray.origin.y, position.z - ray.origin.z);
 
       if (len < 0f) {
         continue;
       }
 
-      float dist2 = position.getPosition().dst2(ray.origin.x + ray.direction.x * len, ray.origin.y + ray.direction.y * len, ray.origin.z + ray.direction.z * len);
+      float dist2 = position.dst2(ray.origin.x + ray.direction.x * len, ray.origin.y + ray.direction.y * len, ray.origin.z + ray.direction.z * len);
 
       if (distance >= 0f && dist2 > distance) {
         continue;
       }
 
       if (dist2 <= 1f) {
-        float dist = this.position.getPosition().dst(position.getPosition());
+        float dist = this.position.dst(position);
 
         map.put(dist, block);
 

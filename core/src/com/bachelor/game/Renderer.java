@@ -52,13 +52,15 @@ public class Renderer {
 
   public void render() {
 //    Gdx.app.log("FPS", String.valueOf(Gdx.graphics.getFramesPerSecond()));
+    Gdx.graphics.setTitle(String.valueOf(Gdx.graphics.getFramesPerSecond()));
 
-    Gdx.gl.glClear(GL20.GL_DEPTH_BUFFER_BIT | GL20.GL_COLOR_BUFFER_BIT | (Gdx.graphics.getBufferFormat().coverageSampling?GL20.GL_COVERAGE_BUFFER_BIT_NV:0));
+    Gdx.gl.glClear(GL20.GL_DEPTH_BUFFER_BIT | GL20.GL_COLOR_BUFFER_BIT |
+      (Gdx.graphics.getBufferFormat().coverageSampling?GL20.GL_COVERAGE_BUFFER_BIT_NV:0));
     game.getCamera().update();
     modelBatch.begin(game.getCamera());
 
-    game.getWorld().renderNew(modelBatch, environment);
-//    modelBatch.render(game.getWorld().getSkydome());
+    game.getWorld().renderWorld(modelBatch, environment);
+    modelBatch.render(game.getWorld().getSkydome());
 
     modelBatch.end();
   }

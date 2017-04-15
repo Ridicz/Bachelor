@@ -11,11 +11,11 @@ public class Block extends Item {
 
   private BlockType blockType;
 
-  private Position position;
+  private IntegerPosition position;
 
   private Set<Side> visibleSides;
 
-  public Block(Position position, BlockType blockType) {
+  public Block(IntegerPosition position, BlockType blockType) {
     super();
     this.position = position;
     this.blockType = blockType;
@@ -24,7 +24,7 @@ public class Block extends Item {
     System.out.println(blockId);
   }
 
-  public Position getPosition() {
+  public IntegerPosition getPosition() {
     return position;
   }
 
