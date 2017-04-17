@@ -48,13 +48,14 @@ public class World {
 
     for (int i = 0; i < 16; i++) {
       for (int j = 0; j < 16; j++) {
-        chunkList.get(0).setBlock(i, 1, j, BlockType.Stone);
+
         chunkList.get(1).setBlock(i, 1, j, BlockType.Stone);
         chunkList.get(2).setBlock(i, 1, j, BlockType.Stone);
         chunkList.get(4).setBlock(i, 1, j, BlockType.Stone);
         chunkList.get(6).setBlock(i, 1, j, BlockType.Stone);
         chunkList.get(7).setBlock(i, 1, j, BlockType.Stone);
         chunkList.get(8).setBlock(i, 1, j, BlockType.Stone);
+        chunkList.get(0).setBlock(i, 1, j, BlockType.Stone);
 
         for (int k = 0; k < 100; k++) {
           chunkList.get(3).setBlock(i, k, j, BlockType.Gravel);

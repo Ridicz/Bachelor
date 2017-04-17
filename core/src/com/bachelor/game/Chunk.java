@@ -40,6 +40,10 @@ public class Chunk {
           if (storage[i][j][k] != null) {
             Block block = storage[i][j][k];
             addVisibleSides(i, j, k, block);
+
+            if (block.getVisibleSides().size() > 0) {
+              blocks.add(block);
+            }
           }
         }
       }
@@ -162,7 +166,7 @@ public class Chunk {
 
     storage[x][y][z] = newBlock;
 
-    blocks.add(newBlock);
+//    blocks.add(newBlock);
   }
 
   public void destroyBlock(Block block) {
