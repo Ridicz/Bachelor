@@ -165,8 +165,6 @@ public class Chunk {
     Block newBlock = new Block(new IntegerPosition(startPosition.getX() + x, y, startPosition.getZ() + z), type);
 
     storage[x][y][z] = newBlock;
-
-//    blocks.add(newBlock);
   }
 
   public void destroyBlock(Block block) {
@@ -198,11 +196,13 @@ public class Chunk {
 
       if (block != null) {
         block.addVisibleSide(Side.Front);
+        chunk.addVisibleBlock(block);
         chunk.rebuildModel();
       }
 
       if (storage[x + 1][y][z] != null) {
         storage[x + 1][y][z].addVisibleSide(Side.Back);
+        blocks.add(storage[x + 1][y][z]);
       }
     } else if (x == WIDTH - 1) {
       Chunk chunk = World.getChunk(startPosition.add(new IntegerPosition(x, y, z)).add(new IntegerPosition(WIDTH, 0, 0)));
@@ -213,28 +213,34 @@ public class Chunk {
 
       if (block != null) {
         block.addVisibleSide(Side.Back);
+        chunk.addVisibleBlock(block);
         chunk.rebuildModel();
       }
 
       if (storage[x - 1][y][z] != null) {
         storage[x - 1][y][z].addVisibleSide(Side.Front);
+        blocks.add(storage[x - 1][y][z]);
       }
     } else {
       if (storage[x + 1][y][z] != null) {
         storage[x + 1][y][z].addVisibleSide(Side.Back);
+        blocks.add(storage[x + 1][y][z]);
       }
 
       if (storage[x - 1][y][z] != null) {
         storage[x - 1][y][z].addVisibleSide(Side.Front);
+        blocks.add(storage[x - 1][y][z]);
       }
     }
 
     if (storage[x][y + 1][z] != null) {
       storage[x][y + 1][z].addVisibleSide(Side.Bottom);
+      blocks.add(storage[x][y + 1][z]);
     }
 
     if (y != 0 && storage[x][y - 1][z] != null) {
       storage[x][y - 1][z].addVisibleSide(Side.Top);
+      blocks.add(storage[x][y - 1][z]);
     }
 
     block = null;
@@ -248,11 +254,13 @@ public class Chunk {
 
       if (block != null) {
         block.addVisibleSide(Side.Left);
+        chunk.addVisibleBlock(block);
         chunk.rebuildModel();
       }
 
       if (storage[x][y][z + 1] != null) {
         storage[x][y][z + 1].addVisibleSide(Side.Right);
+        blocks.add(storage[x][y][z + 1]);
       }
     } else if (z == LENGTH - 1) {
       Chunk chunk = World.getChunk(startPosition.add(new IntegerPosition(x, y, z)).add(new IntegerPosition(0, 0, LENGTH)));
@@ -263,21 +271,29 @@ public class Chunk {
 
       if (block != null) {
         block.addVisibleSide(Side.Right);
+        chunk.addVisibleBlock(block);
         chunk.rebuildModel();
       }
 
       if (storage[x][y][z - 1] != null) {
         storage[x][y][z - 1].addVisibleSide(Side.Left);
+        blocks.add(storage[x][y][z - 1]);
       }
     } else {
       if (storage[x][y][z + 1] != null) {
         storage[x][y][z + 1].addVisibleSide(Side.Right);
+        blocks.add(storage[x][y][z + 1]);
       }
 
       if (storage[x][y][z - 1] != null) {
         storage[x][y][z - 1].addVisibleSide(Side.Left);
+        blocks.add(storage[x][y][z - 1]);
       }
     }
+  }
+
+  public void addVisibleBlock(Block block) {
+    blocks.add(block);
   }
 
   public boolean isVisible() {

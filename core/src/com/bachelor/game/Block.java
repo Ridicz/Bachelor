@@ -1,5 +1,8 @@
 package com.bachelor.game;
 
+import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.BoundingBox;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -26,6 +29,10 @@ public class Block extends Item {
 
   public IntegerPosition getPosition() {
     return position;
+  }
+
+  public BoundingBox getBoundingBox() {
+    return new BoundingBox(position.getPositionVector(), position.getPositionVector().cpy().add(1f, 1f, 1f));
   }
 
   public BlockType getBlockType() {

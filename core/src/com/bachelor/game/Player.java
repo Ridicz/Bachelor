@@ -14,7 +14,7 @@ public class Player {
 
   public static final float HEIGHT = 1.8f;
 
-  public static final float WIDTH = 0.6f;
+  public static final float SIZE = 0.2f;
 
   public static final float CAMERA_HEIGHT = 1.6f;
 
@@ -37,6 +37,8 @@ public class Player {
   private float verticalVelocity = 0f;
 
   private Vector2 jumpDirection = new Vector2();
+
+  private Vector3 movement = new Vector3();
 
   public Player(PerspectiveCamera camera) {
     this(camera, new Vector3(8f, 10f, 8f));
@@ -73,10 +75,6 @@ public class Player {
   }
 
   public void move(Direction direction) {
-    if (!isOnGround()) {
-      return;
-    }
-
     horizontalVelocity = Math.min(WALK_SPEED, horizontalVelocity + ACCELERATION);
 
     Vector2 moveVector =  new Vector2();
@@ -108,7 +106,9 @@ public class Player {
 
     jumpDirection.set(velocity);
 
-    position.add(velocity.x, 0f, velocity.y);
+//    position.add(velocity.x, 0f, velocity.y);
+
+    movement.add(velocity.x, 0f, velocity.y);
   }
 
   private boolean isOnGround() {
@@ -145,39 +145,68 @@ public class Player {
 
   public void jump() {
     if (isOnGround()) {
-      verticalVelocity = 1f;
+      movement.y = 1f;
     }
   }
 
   public void update() {
-    if (isOnGround()) {
-      if (horizontalVelocity > 0f) {
-        horizontalVelocity -= ACCELERATION / 2;
-      }
+    Vector3 shift = new Vector3(movement.x, 0f, 0f);
 
-      jumpDirection.setZero();
+    if (! checkCollision(shift)) {
+      position.add(shift);
+
     } else {
-      if (!checkCollision(new Vector3(jumpDirection.x, 0.1f, jumpDirection.y))) {
-        position.add(jumpDirection.x, 0.2f * verticalVelocity, jumpDirection.y);
-      } else {
-        position.add(0f, 0.2f * verticalVelocity, 0f);
-      }
 
-      verticalVelocity = Math.max(-2f, verticalVelocity - 0.04f);
+    }
+
+    shift.set(0f, movement.y, 0f);
+
+    if (! checkCollision(shift)) {
+      movement.add(0f, -0.01f, 0f);
+      position.add(shift);
+    } else {
+      movement.y = 0f;
+    }
+
+    shift.set(0f, 0f, movement.z);
+
+    if (! checkCollision(shift)) {
+      position.add(shift);
+    } else {
+
     }
 
     camera.position.set(position.x, position.y + CAMERA_HEIGHT, position.z);
+
+    Vector2 v = new Vector2(movement.x, movement.z);
+
+    v.scl(-0.1f);
+
+    movement.x = v.x;
+    movement.z = v.y;
   }
 
   private boolean checkCollision(Vector3 direction) {
-    Vector3 positionLatter = direction.add(position);
+    Block currentBlock = getCurrentChunk().getBlock(position);
 
-    Chunk currentChunk = World.getChunk(positionLatter);
+    BoundingBox playerBoundingBox = new BoundingBox(position.cpy().sub(SIZE / 2f, 0f, SIZE / 2).add(direction), position.cpy().add(SIZE / 2f, HEIGHT, SIZE / 2).add(direction));
 
-//    Block lowerBlock = currentChunk.getBlock(positionLatter);
-    Block upperBlock = currentChunk.getBlock(positionLatter.add(0f, 1f, 0f));
+    for (Block block : getCurrentChunk().getBlocks()) {
+      if (playerBoundingBox.intersects(block.getBoundingBox())) {
 
-    return /*lowerBlock != null ||*/ upperBlock != null;
+        System.out.println("---");
+        System.out.println(position);
+        System.out.println(block.getBoundingBox().getMin(new Vector3()));
+        System.out.println(block.getBoundingBox().getMax(new Vector3()));
+        System.out.println(playerBoundingBox.getMin(new Vector3()));
+        System.out.println(playerBoundingBox.getMax(new Vector3()));
+        System.out.println("---");
+
+        return true;
+      }
+    }
+
+    return false;
   }
 
   public Chunk getCurrentChunk() {

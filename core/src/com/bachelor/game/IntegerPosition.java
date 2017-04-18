@@ -1,5 +1,7 @@
 package com.bachelor.game;
 
+import com.badlogic.gdx.math.Vector3;
+
 public class IntegerPosition {
 
   private int x;
@@ -44,6 +46,10 @@ public class IntegerPosition {
 
   public IntegerPosition sub(IntegerPosition position) {
     return new IntegerPosition(this.x - position.getX(), this.y - position.getY(), this.z - position.getZ());
+  }
+
+  public Vector3 getPositionVector() {
+    return new Vector3(x, y, z);
   }
 
   @Override

@@ -1,8 +1,8 @@
 package com.bachelor.game.desktop;
 
+import com.bachelor.game.BachelorClient;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
-import com.bachelor.game.BachelorClient;
 
 public class DesktopLauncher {
 	public static void main (String[] arg) {
@@ -11,15 +11,15 @@ public class DesktopLauncher {
 
 	private static LwjglApplicationConfiguration createConfiguration() {
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-		config.width = 1200;
-		config.height = 700;
+		config.width = 1920;
+		config.height = 1080;
 		config.fullscreen = false;
 		config.resizable = false;
 		config.title = "Test Game";
 		config.vSyncEnabled = true;
 		config.foregroundFPS = 60;
 		config.backgroundFPS = -1;
-		config.samples = 4;
+		config.samples = 8;
 
 		return config;
 	}
