@@ -2,15 +2,19 @@ package com.bachelor.game;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 public class BachelorClient extends ApplicationAdapter {
 
 	public static final short FIELD_OF_VIEW = 70;
+
+	private static BachelorClient gameInstance;
 
 	private PerspectiveCamera camera;
 
@@ -20,13 +24,11 @@ public class BachelorClient extends ApplicationAdapter {
 
 	private Renderer renderer;
 
-	private InputHandler inputHandler;
-
 	private Player player;
 
 	private World world;
 
-	private static BachelorClient gameInstance;
+	private BitmapFont font;
 
 	public static BachelorClient getInstance() {
 		return gameInstance;
@@ -37,8 +39,7 @@ public class BachelorClient extends ApplicationAdapter {
 		initCamera();
 		renderer = new Renderer(this);
 		player = new Player(camera);
-		inputHandler = new InputHandler(player);
-		Gdx.input.setInputProcessor(inputHandler);
+		Gdx.input.setInputProcessor(new InputHandler(player));
 		Gdx.input.setCursorCatched(true);
 		world = new World();
 		gameInstance = this;
@@ -51,6 +52,10 @@ public class BachelorClient extends ApplicationAdapter {
 		camera.far = 350f;
 		camera.update();
 
+		font = new BitmapFont();
+		font.setColor(Color.RED);
+		font.getData().scale(2f);
+
 		hudCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		hudBatch = new SpriteBatch();
 		hudBatch.setProjectionMatrix(hudCamera.combined);
@@ -58,7 +63,6 @@ public class BachelorClient extends ApplicationAdapter {
 
 	@Override
 	public void render () {
-		inputHandler.update();
 		player.update();
 		renderer.render();
 
@@ -67,6 +71,7 @@ public class BachelorClient extends ApplicationAdapter {
 		Sprite sprite = new Sprite(new Texture("crosshair.png"));
 		sprite.setPosition(-20, -20);
 		sprite.draw(hudBatch);
+		font.draw(hudBatch, player.getPosition().toString(), 0, 400f);
 		hudBatch.end();
 	}
 	

@@ -13,8 +13,8 @@ public class BlockRenderer {
 
   public static void prepareTextures() {
     textureMap = new HashMap<>();
-    textureMap.put(BlockType.Gravel, new UVHolder(2, 0));
-    textureMap.put(BlockType.Stone, new UVHolder(7, 0));
+    textureMap.put(BlockType.Gravel, new UVHolder(2, 2));
+    textureMap.put(BlockType.Stone, new UVHolder(0, 0));
 //    textureMap.put(BlockType.Stone, new UVHolder(13, 15));
 //    textureMap.put(BlockType.Gravel, new UVHolder(13, 15));
   }

@@ -16,6 +16,12 @@ public class IntegerPosition {
     this.z = z;
   }
 
+  public IntegerPosition(IntegerPosition position) {
+    this.x = position.getX();
+    this.y = position.getY();
+    this.z = position.getZ();
+  }
+
   public int getX() {
     return this.x;
   }
@@ -44,8 +50,16 @@ public class IntegerPosition {
     return new IntegerPosition(this.x + position.getX(), this.y + position.getY(), this.z + position.getZ());
   }
 
+  public IntegerPosition add(int x, int y, int z) {
+    return add(new IntegerPosition(x, y, z));
+  }
+
   public IntegerPosition sub(IntegerPosition position) {
     return new IntegerPosition(this.x - position.getX(), this.y - position.getY(), this.z - position.getZ());
+  }
+
+  public IntegerPosition sub(int x, int y, int z) {
+    return sub(new IntegerPosition(x, y, z));
   }
 
   public Vector3 getPositionVector() {

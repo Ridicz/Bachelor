@@ -19,7 +19,7 @@ public class DesktopLauncher {
 		config.vSyncEnabled = true;
 		config.foregroundFPS = 60;
 		config.backgroundFPS = -1;
-		config.samples = 8;
+		config.samples = 16;
 
 		return config;
 	}

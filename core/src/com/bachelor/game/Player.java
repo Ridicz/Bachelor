@@ -1,14 +1,12 @@
 package com.bachelor.game;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
-import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.math.collision.Ray;
 
-import java.util.Arrays;
-import java.util.TreeMap;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Player {
 
@@ -20,7 +18,9 @@ public class Player {
 
   private static final float WALK_SPEED = 0.2f;
 
-  private static final float ACCELERATION = 0.02f;
+  private static final float ACCELERATION = 0.008f;
+
+  private static final float REACH_RANGE = 5.5f;
 
   private Vector3 position;
 
@@ -38,10 +38,10 @@ public class Player {
 
   private Vector2 jumpDirection = new Vector2();
 
-  private Vector3 movement = new Vector3();
+  private Set<InputKeys> pressedKeys = new HashSet<>();
 
   public Player(PerspectiveCamera camera) {
-    this(camera, new Vector3(8f, 10f, 8f));
+    this(camera, new Vector3(8f, 90f, 8f));
   }
 
   public Player(PerspectiveCamera camera, Vector3 position) {
@@ -74,7 +74,7 @@ public class Player {
     this.toolEquipped = toolEquipped;
   }
 
-  public void move(Direction direction) {
+  public Vector2 move(InputKeys direction) {
     horizontalVelocity = Math.min(WALK_SPEED, horizontalVelocity + ACCELERATION);
 
     Vector2 moveVector =  new Vector2();
@@ -97,29 +97,13 @@ public class Player {
         break;
     }
 
-    Vector2 velocity = new Vector2();
-    velocity.set(moveVector.x, moveVector.y);
+    Vector2 rotation = new Vector2(camera.direction.x, camera.direction.z);
 
-    Vector2 rot = new Vector2(camera.direction.x, camera.direction.z);
+    moveVector.rotate(rotation.angle());
 
-    velocity.rotate(rot.angle());
+    jumpDirection.set(moveVector);
 
-    jumpDirection.set(velocity);
-
-//    position.add(velocity.x, 0f, velocity.y);
-
-    movement.add(velocity.x, 0f, velocity.y);
-  }
-
-  private boolean isOnGround() {
-    if (verticalVelocity > 0f || getCurrentChunk().getBlock(position) == null) {
-      return false;
-    }
-
-    verticalVelocity = 0f;
-    position.y = getCurrentChunk().getBlock(position).getPosition().getY() + 0.99f;
-
-    return true;
+    return moveVector;
   }
 
   public void rotate(float yaw, float pitch) {
@@ -143,73 +127,83 @@ public class Player {
     }
   }
 
-  public void jump() {
-    if (isOnGround()) {
-      movement.y = 1f;
+  public void isOnGround() {
+    if (MathUtils.isZero(verticalVelocity) && checkCollision(new Vector3(0f, -0.1f, 0f))) {
+      verticalVelocity = 0.2f;
     }
   }
 
   public void update() {
-    Vector3 shift = new Vector3(movement.x, 0f, 0f);
-
-    if (! checkCollision(shift)) {
-      position.add(shift);
-
-    } else {
-
+    if (pressedKeys.contains(InputKeys.Jump)) {
+      isOnGround();
     }
 
-    shift.set(0f, movement.y, 0f);
+    boolean moving = false;
 
-    if (! checkCollision(shift)) {
-      movement.add(0f, -0.01f, 0f);
-      position.add(shift);
-    } else {
-      movement.y = 0f;
+    Vector2 horizontalShift = new Vector2();
+
+    if (pressedKeys.contains(InputKeys.Forward)) {
+      horizontalShift.set(move(InputKeys.Forward));
+      moving = true;
+    } else if (pressedKeys.contains(InputKeys.Backward)) {
+      horizontalShift.set(move(InputKeys.Backward));
+      moving = true;
     }
 
-    shift.set(0f, 0f, movement.z);
+    if (pressedKeys.contains(InputKeys.Left)) {
+      horizontalShift.add(move(InputKeys.Left));
+      moving = true;
+    } else if (pressedKeys.contains(InputKeys.Right)) {
+      horizontalShift.add(move(InputKeys.Right));
+      moving = true;
+    }
+
+    if (! moving) {
+      horizontalVelocity = 0;
+    }
+
+    horizontalShift.limit(WALK_SPEED);
+
+    Vector3 shift = new Vector3(horizontalShift.x, 0f, 0f);
 
     if (! checkCollision(shift)) {
       position.add(shift);
-    } else {
+    }
 
+    shift.set(0f, verticalVelocity, 0f);
+
+    if (! checkCollision(shift)) {
+      position.add(shift);
+//      verticalVelocity = Math.min(0.1f, verticalVelocity - 0.01f);
+      verticalVelocity -= 0.02f;
+    } else {
+      verticalVelocity = 0f;
+    }
+
+    shift.set(0f, 0f, horizontalShift.y);
+
+    if (! checkCollision(shift)) {
+      position.add(shift);
     }
 
     camera.position.set(position.x, position.y + CAMERA_HEIGHT, position.z);
-
-    Vector2 v = new Vector2(movement.x, movement.z);
-
-    v.scl(-0.1f);
-
-    movement.x = v.x;
-    movement.z = v.y;
   }
 
   private boolean checkCollision(Vector3 direction) {
-    Block currentBlock = getCurrentChunk().getBlock(position);
+    BoundingBox playerBoundingBox = new BoundingBox(position.cpy().sub(SIZE, 0f, SIZE).add(direction), position.cpy().add(SIZE, HEIGHT, SIZE).add(direction));
 
-    BoundingBox playerBoundingBox = new BoundingBox(position.cpy().sub(SIZE / 2f, 0f, SIZE / 2).add(direction), position.cpy().add(SIZE / 2f, HEIGHT, SIZE / 2).add(direction));
-
-    for (Block block : getCurrentChunk().getBlocks()) {
-      if (playerBoundingBox.intersects(block.getBoundingBox())) {
-
-        System.out.println("---");
-        System.out.println(position);
-        System.out.println(block.getBoundingBox().getMin(new Vector3()));
-        System.out.println(block.getBoundingBox().getMax(new Vector3()));
-        System.out.println(playerBoundingBox.getMin(new Vector3()));
-        System.out.println(playerBoundingBox.getMax(new Vector3()));
-        System.out.println("---");
-
-        return true;
+    for (Chunk chunk : World.getChunksInRange(position, 1f)) {
+      for (Block block : chunk.getBlocks()) {
+        if (playerBoundingBox.intersects(block.getBoundingBox())) {
+          return true;
+        }
       }
     }
 
     return false;
   }
 
-  public Chunk getCurrentChunk() {
+  private Chunk getCurrentChunk() {
     return World.getChunk(position);
   }
 
@@ -217,7 +211,47 @@ public class Player {
     Block block = getTargetBlock(screenX, screenY);
 
     if (block != null) {
-      getCurrentChunk().destroyBlock(block);
+      World.getChunk(block.getPosition()).destroyBlock(block);
+    }
+  }
+
+  public void setBlock(int screenX, int screenY) {
+    Block block = getTargetBlock(screenX, screenY);
+
+    if (block == null) {
+      return;
+    }
+
+    Ray ray = camera.getPickRay(960, 536);
+
+    Side selectedSide = Physics.getSelectedSide(block, ray);
+
+    Chunk chunk = World.getChunk(block.getPosition());
+
+    switch (selectedSide) {
+      case Top:
+        chunk.setBlockPlayer(block, Side.Top, BlockType.Gravel);
+        break;
+
+      case Bottom:
+        chunk.setBlockPlayer(block, Side.Bottom, BlockType.Gravel);
+        break;
+
+      case Front:
+        chunk.setBlockPlayer(block, Side.Front, BlockType.Gravel);
+        break;
+
+      case Back:
+        chunk.setBlockPlayer(block, Side.Back, BlockType.Gravel);
+        break;
+
+      case Left:
+        chunk.setBlockPlayer(block, Side.Left, BlockType.Gravel);
+        break;
+
+      case Right:
+        chunk.setBlockPlayer(block, Side.Right, BlockType.Gravel);
+        break;
     }
   }
 
@@ -230,32 +264,45 @@ public class Player {
 
     float dst = Float.MAX_VALUE;
 
-    for (Block block : getCurrentChunk().getBlocks()) {
+    for (Chunk chunk : World.getChunksInRange(position, REACH_RANGE)) {
+      for (Block block : chunk.getBlocks()) {
+        float dist2 = ray.origin.dst2(pos);
 
-      float dist2 = ray.origin.dst2(pos);
+        if (distance >= 0f && dist2 > distance) {
+          continue;
+        }
 
-      if (distance >= 0f && dist2 > distance) {
-        continue;
-      }
+        if (Intersector.intersectRayBoundsFast(ray, pos, new Vector3(1, 1, 1))) {
+          distance = dist2;
 
-      if (Intersector.intersectRayBoundsFast(ray, pos, new Vector3(1, 1, 1))) {
-        distance = dist2;
+          Vector3 v = new Vector3();
+          if (Intersector.intersectRayBounds(ray, new BoundingBox(new Vector3(block.getPosition().getX(),
+            block.getPosition().getY(), block.getPosition().getZ()), new Vector3(block.getPosition().getX() + 1,
+            block.getPosition().getY() + 1, block.getPosition().getZ() + 1)), v)) {
 
-        Vector3 v = new Vector3();
-        if (Intersector.intersectRayBounds(ray, new BoundingBox(new Vector3(block.getPosition().getX(),
-          block.getPosition().getY(), block.getPosition().getZ()), new Vector3(block.getPosition().getX() + 1,
-          block.getPosition().getY() + 1, block.getPosition().getZ() + 1)), v)) {
+            float curDst = v.dst(position);
 
-          float curDst = v.dst(position);
-
-          if (curDst < dst) {
-            dst = curDst;
-            result = block;
+            if (curDst < dst) {
+              dst = curDst;
+              result = block;
+            }
           }
         }
       }
     }
 
+    if (dst > 5) {
+      return null;
+    }
+
     return result;
+  }
+
+  public void addKeyPressed(InputKeys key) {
+    pressedKeys.add(key);
+  }
+
+  public void removeKeyPressed(InputKeys key) {
+    pressedKeys.remove(key);
   }
 }

@@ -1,6 +1,5 @@
 package com.bachelor.game;
 
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 
 import java.util.HashSet;

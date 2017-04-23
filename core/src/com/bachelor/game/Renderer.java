@@ -2,6 +2,7 @@ package com.bachelor.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.GL30;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Material;
@@ -43,7 +44,10 @@ public class Renderer {
 
     Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-    material = new Material(TextureAttribute.createDiffuse(new Texture("atlas.png")));
+    Texture texture = new Texture("assetshd.jpg");
+    texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+
+    material = new Material(TextureAttribute.createDiffuse(texture));
   }
 
   public static Material getMaterial() {
@@ -51,11 +55,10 @@ public class Renderer {
   }
 
   public void render() {
-//    Gdx.app.log("FPS", String.valueOf(Gdx.graphics.getFramesPerSecond()));
     Gdx.graphics.setTitle(String.valueOf(Gdx.graphics.getFramesPerSecond()));
 
-    Gdx.gl.glClear(GL20.GL_DEPTH_BUFFER_BIT | GL20.GL_COLOR_BUFFER_BIT |
-      (Gdx.graphics.getBufferFormat().coverageSampling?GL20.GL_COVERAGE_BUFFER_BIT_NV:0));
+    Gdx.gl.glClear(GL30.GL_DEPTH_BUFFER_BIT | GL30.GL_COLOR_BUFFER_BIT | (Gdx.graphics.getBufferFormat().coverageSampling?GL30.GL_COVERAGE_BUFFER_BIT_NV:0));
+
     game.getCamera().update();
     modelBatch.begin(game.getCamera());
 

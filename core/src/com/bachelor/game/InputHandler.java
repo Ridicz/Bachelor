@@ -4,19 +4,13 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 
-import java.util.HashSet;
-import java.util.Set;
-
 public class InputHandler implements InputProcessor {
 
   private static final float MOUSE_SENSITIVITY = 0.18f;
 
-  private Set<Integer> pressedKeys;
-
   private Player player;
 
   public InputHandler(Player player) {
-    pressedKeys = new HashSet<>();
     this.player = player;
   }
 
@@ -26,12 +20,52 @@ public class InputHandler implements InputProcessor {
       Gdx.app.exit();
     }
 
-    return pressedKeys.add(keycode);
+    if (keycode == Input.Keys.W) {
+      player.addKeyPressed(InputKeys.Forward);
+    }
+
+    if (keycode == Input.Keys.S) {
+      player.addKeyPressed(InputKeys.Backward);
+    }
+
+    if (keycode == Input.Keys.A) {
+      player.addKeyPressed(InputKeys.Left);
+    }
+
+    if (keycode == Input.Keys.D) {
+      player.addKeyPressed(InputKeys.Right);
+    }
+
+    if (keycode == Input.Keys.SPACE) {
+      player.addKeyPressed(InputKeys.Jump);
+    }
+
+    return true;
   }
 
   @Override
   public boolean keyUp(int keycode) {
-    return pressedKeys.remove(keycode);
+    if (keycode == Input.Keys.W) {
+      player.removeKeyPressed(InputKeys.Forward);
+    }
+
+    if (keycode == Input.Keys.S) {
+      player.removeKeyPressed(InputKeys.Backward);
+    }
+
+    if (keycode == Input.Keys.A) {
+      player.removeKeyPressed(InputKeys.Left);
+    }
+
+    if (keycode == Input.Keys.D) {
+      player.removeKeyPressed(InputKeys.Right);
+    }
+
+    if (keycode == Input.Keys.SPACE) {
+      player.removeKeyPressed(InputKeys.Jump);
+    }
+
+    return true;
   }
 
   @Override
@@ -45,7 +79,11 @@ public class InputHandler implements InputProcessor {
       player.action(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
     }
 
-    return false;
+    if (button == 1) {
+      player.setBlock(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
+    }
+
+    return true;
   }
 
   @Override
@@ -55,15 +93,14 @@ public class InputHandler implements InputProcessor {
 
   @Override
   public boolean touchDragged(int screenX, int screenY, int pointer) {
-    return false;
+    updateRotation();
+
+    return true;
   }
 
   @Override
   public boolean mouseMoved(int screenX, int screenY) {
-    float yaw = Gdx.input.getDeltaX() * MOUSE_SENSITIVITY;
-    float pitch = Gdx.input.getDeltaY() * MOUSE_SENSITIVITY;
-
-    player.rotate(yaw, pitch);
+    updateRotation();
 
     return false;
   }
@@ -73,25 +110,10 @@ public class InputHandler implements InputProcessor {
     return false;
   }
 
-  public void update() {
-    if (pressedKeys.contains(Input.Keys.W)) {
-      player.move(Direction.Forward);
-    }
+  private void updateRotation() {
+    float yaw = Gdx.input.getDeltaX() * MOUSE_SENSITIVITY;
+    float pitch = Gdx.input.getDeltaY() * MOUSE_SENSITIVITY;
 
-    if (pressedKeys.contains(Input.Keys.S)) {
-      player.move(Direction.Backward);
-    }
-
-    if (pressedKeys.contains(Input.Keys.A)) {
-      player.move(Direction.Left);
-    }
-
-    if (pressedKeys.contains(Input.Keys.D)) {
-      player.move(Direction.Right);
-    }
-
-    if (pressedKeys.contains(Input.Keys.SPACE)) {
-      player.jump();
-    }
+    player.rotate(yaw, pitch);
   }
 }

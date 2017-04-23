@@ -1,7 +1,6 @@
 package com.bachelor.game;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.GL30;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
@@ -13,11 +12,11 @@ import java.util.Set;
 
 public class Chunk {
 
-  private static final short WIDTH = 16;
+  public static final short WIDTH = 16;
 
-  private static final short HEIGHT = 256;
+  public static final short HEIGHT = 256;
 
-  private static final short LENGTH = 16;
+  public static final short LENGTH = 16;
 
   private IntegerPosition startPosition;
 
@@ -52,7 +51,7 @@ public class Chunk {
     rebuildModel();
   }
 
-  private void addVisibleSides(int x, int y, int z, Block block) {
+  private void addVisibleSides(int x, int y, int z, Block block) { //TODO reformat this crap
     if (x == 0) {
       Chunk chunk = World.getChunk(startPosition.add(new IntegerPosition(x, y, z)).sub(new IntegerPosition(WIDTH, 0, 0)));
 
@@ -157,20 +156,37 @@ public class Chunk {
     return blocks;
   }
 
-  public void setBlock(int x, int y, int z, BlockType type) {
+  public Block setBlock(int x, int y, int z, BlockType type) {
     if (storage[x][y][z] != null) {
-      return;
+      return null;
     }
 
     Block newBlock = new Block(new IntegerPosition(startPosition.getX() + x, y, startPosition.getZ() + z), type);
 
     storage[x][y][z] = newBlock;
+
+    return newBlock;
+  }
+
+  public void setBlockPlayer(Block selectedBlock, Side side, BlockType type) { //TODO Sometimes blocks created cannot be destroyed, check why
+    ChunkAndBlockPosition target = getNeighbour(selectedBlock.getPosition(), side);
+
+    Block block = target.getChunk().setBlock(target.getPosition().getX() % WIDTH, target.getPosition().getY(), target.getPosition().getZ() % LENGTH, type);
+
+    block.addVisibleSide(Side.Front);
+    block.addVisibleSide(Side.Back);
+    block.addVisibleSide(Side.Top);
+    block.addVisibleSide(Side.Bottom);
+    block.addVisibleSide(Side.Left);
+    block.addVisibleSide(Side.Right);
+    blocks.add(block);
+    rebuildModel();
   }
 
   public void destroyBlock(Block block) {
     IntegerPosition position = block.getPosition();
 
-    Gdx.app.log("Chunk.destroyBlock", position.toString());
+    System.out.println(position);
 
     int localX = position.getX() % WIDTH;
     int localY = position.getY();
@@ -178,13 +194,12 @@ public class Chunk {
 
     storage[localX][localY][localZ] = null;
     makeNeighbourBlocksVisible(localX, localY, localZ);
-    System.out.println(block.getBlockId());
-    System.out.println(blocks.remove(block));
+    blocks.remove(block);
 
     rebuildModel();
   }
 
-  private void makeNeighbourBlocksVisible(int x, int y, int z) {
+  private void makeNeighbourBlocksVisible(int x, int y, int z) { //TODO reformat this crap also
     Block block = null;
 
     if (x == 0) {
@@ -307,7 +322,7 @@ public class Chunk {
 
   public void rebuildModel() {
     MeshBuilder meshBuilder = new MeshBuilder();
-    meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.TextureCoordinates | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.Normal, GL20.GL_TRIANGLES);
+    meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.TextureCoordinates | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.Normal, GL30.GL_TRIANGLES);
     meshBuilder.ensureCapacity(Short.MAX_VALUE, Short.MAX_VALUE);
 
     for (Block block : blocks) {
@@ -319,6 +334,72 @@ public class Chunk {
 
   public Mesh getMesh() {
     return mesh;
+  }
+
+  public ChunkAndBlockPosition getNeighbour(IntegerPosition position, Side side) {
+    IntegerPosition neighbourPosition;
+
+    switch (side) {
+      case Right:
+        if (position.getZ() % LENGTH != LENGTH - 1) {
+          return new ChunkAndBlockPosition(this, new IntegerPosition(position.getX(), position.getY(), position.getZ() + 1));
+        } else {
+          Chunk chunk = World.getChunk(position.add(0, 0, LENGTH));
+
+          neighbourPosition = new IntegerPosition(position.getX(), position.getY(), position.getZ() + 1);
+
+          return new ChunkAndBlockPosition(chunk, neighbourPosition);
+        }
+
+      case Left:
+        if (position.getZ() % LENGTH != 0) {
+          return new ChunkAndBlockPosition(this, new IntegerPosition(position.getX(), position.getY(), position.getZ() - 1));
+        } else {
+          Chunk chunk = World.getChunk(position.sub(0, 0, LENGTH));
+
+          neighbourPosition = new IntegerPosition(position.getX(), position.getY(), position.getZ() - 1);
+
+          return new ChunkAndBlockPosition(chunk, neighbourPosition);
+        }
+
+      case Top:
+        if (position.getY() != HEIGHT - 1) {
+          return new ChunkAndBlockPosition(this, new IntegerPosition(position.getX(), position.getY() + 1, position.getZ()));
+        }
+
+        break;
+
+      case Bottom:
+        if (position.getY() != 0) {
+          return new ChunkAndBlockPosition(this, new IntegerPosition(position.getX(), position.getY() - 1, position.getZ()));
+        }
+
+        break;
+
+      case Front:
+        if (position.getX() % WIDTH != 0) {
+          return new ChunkAndBlockPosition(this, new IntegerPosition(position.getX() - 1, position.getY(), position.getZ()));
+        } else {
+          Chunk chunk = World.getChunk(position.sub(WIDTH, 0, 0));
+
+          neighbourPosition = new IntegerPosition(position.getX() - 1, position.getY(), position.getZ());
+
+          return new ChunkAndBlockPosition(chunk, neighbourPosition);
+        }
+
+      case Back:
+        if (position.getX() % WIDTH != WIDTH - 1) {
+          return new ChunkAndBlockPosition(this, new IntegerPosition(position.getX() + 1, position.getY(), position.getZ()));
+        } else {
+          Chunk chunk = World.getChunk(position.add(WIDTH, 0, 0));
+
+          neighbourPosition = new IntegerPosition(position.getX() + 1, position.getY(), position.getZ());
+
+          return new ChunkAndBlockPosition(chunk, neighbourPosition);
+        }
+    }
+
+    return null;
   }
 
   @Override
