@@ -168,7 +168,7 @@ public class Chunk {
     return newBlock;
   }
 
-  public void setBlockPlayer(Block selectedBlock, Side side, BlockType type) { //TODO Sometimes blocks created cannot be destroyed, check why
+  public void setBlockPlayer(Block selectedBlock, Side side, BlockType type) {
     ChunkAndBlockPosition target = getNeighbour(selectedBlock.getPosition(), side);
 
     Block block = target.getChunk().setBlock(target.getPosition().getX() % WIDTH, target.getPosition().getY(), target.getPosition().getZ() % LENGTH, type);
@@ -179,14 +179,13 @@ public class Chunk {
     block.addVisibleSide(Side.Bottom);
     block.addVisibleSide(Side.Left);
     block.addVisibleSide(Side.Right);
-    blocks.add(block);
-    rebuildModel();
+
+    target.getChunk().getBlocks().add(block);
+    target.getChunk().rebuildModel();
   }
 
   public void destroyBlock(Block block) {
     IntegerPosition position = block.getPosition();
-
-    System.out.println(position);
 
     int localX = position.getX() % WIDTH;
     int localY = position.getY();
