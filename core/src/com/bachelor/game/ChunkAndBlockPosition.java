@@ -15,6 +15,11 @@ public class ChunkAndBlockPosition {
     this.position = position;
   }
 
+  public void set(Chunk chunk, IntegerPosition position) {
+    this.chunk = chunk;
+    this.position = position;
+  }
+
   public void setChunk(Chunk chunk) {
     this.chunk = chunk;
   }
@@ -32,6 +37,18 @@ public class ChunkAndBlockPosition {
   }
 
   public Block getBlock() {
-    return chunk.getBlock(position);
+    if (chunk != null) {
+      int x = position.getX() % Chunk.WIDTH;
+      int z = position.getZ() % Chunk.LENGTH;
+
+      return chunk.getBlock(x, position.getY(), z);
+    } else {
+      return null;
+    }
+  }
+
+  public void reset() {
+    chunk = null;
+    position = null;
   }
 }

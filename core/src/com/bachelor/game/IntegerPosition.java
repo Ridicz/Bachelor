@@ -10,6 +10,8 @@ public class IntegerPosition {
 
   private int z;
 
+  private Vector3 localVector = new Vector3();
+
   public IntegerPosition(int x, int y, int z) {
     this.x = x;
     this.y = y;
@@ -63,7 +65,7 @@ public class IntegerPosition {
   }
 
   public Vector3 getPositionVector() {
-    return new Vector3(x, y, z);
+    return localVector.set(x, y, z);
   }
 
   @Override

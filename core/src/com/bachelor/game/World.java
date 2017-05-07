@@ -2,10 +2,8 @@ package com.bachelor.game;
 
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL30;
-import com.badlogic.gdx.graphics.g3d.Environment;
-import com.badlogic.gdx.graphics.g3d.Model;
-import com.badlogic.gdx.graphics.g3d.ModelBatch;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.Mesh;
+import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
 
@@ -23,6 +21,8 @@ public class World {
 
   private ModelInstance skydome;
 
+  private static Vector3 localVector = new Vector3();
+
   public World() {
     instance = this;
     modelBuilder = new ModelBuilder();
@@ -33,115 +33,20 @@ public class World {
     skydome = new ModelInstance(assetManager.get("skydome.g3db", Model.class));
     BlockRenderer.prepareTextures();
     createTestMap();
+    initWorld();
   }
 
   private void createTestMap() {
-//    chunkList.add(new Chunk(0, 0));
-//    chunkList.add(new Chunk(0, 1));
-//    chunkList.add(new Chunk(1, 0));
-//    chunkList.add(new Chunk(1, 1));
-//    chunkList.add(new Chunk(1, 2));
-//    chunkList.add(new Chunk(0, 2));
-//    chunkList.add(new Chunk(2, 0));
-//    chunkList.add(new Chunk(2, 1));
-//    chunkList.add(new Chunk(2, 2));
+    chunkList = WorldGenerator.generateMap();
+  }
 
-    for (int i = 0; i < 4; i++) {
-      for (int j = 0; j < 4; j++) {
-        chunkList.add(new Chunk(i, j));
-      }
-    }
-
-    Random random = new Random();
-
-    for (Chunk chunk : chunkList) {
-      int top = random.nextInt(4) * 10;
-
-      for (int k = 0; k < 40; k++) {
-        for (int i = 0; i < 16; i++) {
-          for (int j = 0; j < 16; j++) {
-            chunk.setBlock(i, k, j, BlockType.Stone);
-          }
-        }
-      }
-    }
-
-
-//    for (int i = 0; i < 16; i++) {
-//      for (int j = 0; j < 16; j++) {
-//
-//        chunkList.get(1).setBlock(i, 1, j, BlockType.Stone);
-//        chunkList.get(2).setBlock(i, 1, j, BlockType.Stone);
-//        chunkList.get(4).setBlock(i, 1, j, BlockType.Stone);
-//        chunkList.get(6).setBlock(i, 1, j, BlockType.Stone);
-//        chunkList.get(7).setBlock(i, 1, j, BlockType.Stone);
-//        chunkList.get(8).setBlock(i, 1, j, BlockType.Stone);
-//        chunkList.get(0).setBlock(i, 1, j, BlockType.Stone);
-//
-//        for (int k = 0; k < 100; k++) {
-//          chunkList.get(3).setBlock(i, k, j, BlockType.Gravel);
-//          chunkList.get(5).setBlock(i, k, j, BlockType.Stone);
-//        }
-//      }
-//    }
-//------------------------------------------------------------------
-//
-//    for (int i = -5; i < 5; i++) {
-//      for (int j = -5; j < 5; j++) {
-//        chunkList.add(new Chunk(i, j));
-//      }
-//    }
-//
-//    int counter = 0;
-//
-//    for (int l = -5; l < 5; l++) {
-//      for (int m = -5; m < 5; m++) {
-//        for (int i = 0; i < 16; i++) {
-//          for (int j = 0; j < 16; j++) {
-//            for (int k = 0; k < 120 + l * 10; k++) {
-//              chunkList.get(counter).setBlock(i, k, j, BlockType.Stone);
-//            }
-//          }
-//        }
-//
-//        ++counter;
-//      }
-//    }
-
-//------------------------------------------------
-//    for (int i = 0; i < 5; i++) {
-//      for (int j = 0; j < 5; j++) {
-//        chunkList.add(new Chunk(i, j));
-//      }
-//    }
-//
-//    int counter = 0;
-//
-//    for (Chunk chunk : chunkList) {
-//      for (int i = 0; i < 16; i++) {
-//        for (int j = 0; j < i; j++) {
-//          for (int k = 0; k < 16; k++) {
-//            chunk.setBlock(i, j, k, BlockType.Stone);
-//          }
-//        }
-//      }
-//
-//      Gdx.app.log("World", "Created " + ++counter + "/" + chunkList.size() + " chunk.");
-//    }
-//--------------------------------------------------
-//    chunkList.add(new Chunk(0, 0));
-//
-//    for (int i = 0; i < 5; i++) {
-//      for (int j = 0; j < 5; j++) {
-//        chunkList.get(0).setBlock(i, 1, j, BlockType.Stone);
-//      }
-//    }
-
-    short initialized = 0;
-
+  public void initWorld() {
     for (Chunk chunk : chunkList) {
       chunk.initializeVisibleBlocks();
-      System.out.println("Initialized " + ++initialized + "/" + chunkList.size() + " chunk.");
+    }
+
+    for (Chunk chunk : chunkList) {
+      chunk.loadVisibleBlocks();
     }
   }
 
@@ -150,7 +55,9 @@ public class World {
 
     for (Chunk chunk : chunkList) {
       if (chunk.isVisible()) {
-        modelBuilder.part("XXX", chunk.getMesh(), GL30.GL_TRIANGLES, Renderer.getMaterial());
+        for (Mesh mesh : chunk.getMeshes()) {
+          modelBuilder.part("XXX", mesh, GL30.GL_TRIANGLES, Renderer.getMaterial());
+        }
       }
     }
 
@@ -179,7 +86,8 @@ public class World {
   }
 
   public static Chunk getChunk(IntegerPosition position) {
-    return getChunk(new Vector3(position.getX() + 0.5f, position.getY() + 0.5f, position.getZ() + 0.5f));
+    localVector.set(position.getX() + 0.5f, position.getY() + 0.5f, position.getZ() + 0.5f);
+    return getChunk(localVector);
   }
 
   public static List<Block> getBlocksInRange(Vector3 position, float range) {
@@ -195,24 +103,24 @@ public class World {
 
     chunks.add(getChunk(position));
 
-    Vector3 targetPosition = new Vector3();
+    localVector.set(position.x + range, position.y, position.z);
+    chunks.add(getChunk(localVector));
+    localVector.set(position.x + range, position.y, position.z + range);
+    chunks.add(getChunk(localVector));
+    localVector.set(position.x, position.y, position.z + range);
+    chunks.add(getChunk(localVector));
+    localVector.set(position.x - range, position.y, position.z);
+    chunks.add(getChunk(localVector));
+    localVector.set(position.x - range, position.y, position.z - range);
+    chunks.add(getChunk(localVector));
+    localVector.set(position.x, position.y, position.z - range);
+    chunks.add(getChunk(localVector));
+    localVector.set(position.x + range, position.y, position.z - range);
+    chunks.add(getChunk(localVector));
+    localVector.set(position.x - range, position.y, position.z + range);
+    chunks.add(getChunk(localVector));
 
-    targetPosition.set(position.x + range, position.y, position.z);
-    chunks.add(getChunk(targetPosition));
-    targetPosition.set(position.x + range, position.y, position.z + range);
-    chunks.add(getChunk(targetPosition));
-    targetPosition.set(position.x, position.y, position.z + range);
-    chunks.add(getChunk(targetPosition));
-    targetPosition.set(position.x - range, position.y, position.z);
-    chunks.add(getChunk(targetPosition));
-    targetPosition.set(position.x - range, position.y, position.z - range);
-    chunks.add(getChunk(targetPosition));
-    targetPosition.set(position.x, position.y, position.z - range);
-    chunks.add(getChunk(targetPosition));
-    targetPosition.set(position.x + range, position.y, position.z - range);
-    chunks.add(getChunk(targetPosition));
-    targetPosition.set(position.x - range, position.y, position.z + range);
-    chunks.add(getChunk(targetPosition));
+    chunks.remove(null);
 
     return chunks;
   }

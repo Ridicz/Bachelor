@@ -16,7 +16,7 @@ public class Player {
 
   public static final float CAMERA_HEIGHT = 1.6f;
 
-  private static final float WALK_SPEED = 0.2f;
+  private static final float WALK_SPEED = 0.16f;
 
   private static final float ACCELERATION = 0.008f;
 
@@ -40,8 +40,12 @@ public class Player {
 
   private Set<InputKeys> pressedKeys = new HashSet<>();
 
+  private Vector3 localVector = new Vector3();
+
+  private BoundingBox boundingBox = new BoundingBox();
+
   public Player(PerspectiveCamera camera) {
-    this(camera, new Vector3(8f, 90f, 8f));
+    this(camera, new Vector3(3f, 200f, 70f));
   }
 
   public Player(PerspectiveCamera camera, Vector3 position) {
@@ -107,8 +111,7 @@ public class Player {
   }
 
   public void rotate(float yaw, float pitch) {
-    Vector3 vec = new Vector3();
-    vec.set(camera.direction);
+    localVector.set(camera.direction);
 
     Quaternion q = new Quaternion();
     camera.view.getRotation(q);
@@ -119,17 +122,17 @@ public class Player {
     camera.direction.prj(mat);
 
     if (camera.direction.y >= -0.995f && pitch > 0) {
-      camera.direction.rotate(vec.crs(camera.up), -pitch);
+      camera.direction.rotate(localVector.crs(camera.up), -pitch);
     }
 
     if (camera.direction.y <= 0.995f && pitch < 0) {
-      camera.direction.rotate(vec.crs(camera.up), -pitch);
+      camera.direction.rotate(localVector.crs(camera.up), -pitch);
     }
   }
 
   public void isOnGround() {
-    if (MathUtils.isZero(verticalVelocity) && checkCollision(new Vector3(0f, -0.1f, 0f))) {
-      verticalVelocity = 0.2f;
+    if (MathUtils.isZero(verticalVelocity) && checkCollision(localVector.set(0f, -0.1f, 0f))) {
+      verticalVelocity = 0.16f;
     }
   }
 
@@ -174,8 +177,7 @@ public class Player {
 
     if (! checkCollision(shift)) {
       position.add(shift);
-//      verticalVelocity = Math.min(0.1f, verticalVelocity - 0.01f);
-      verticalVelocity -= 0.02f;
+      verticalVelocity -= 0.01f;
     } else {
       verticalVelocity = 0f;
     }
@@ -190,11 +192,11 @@ public class Player {
   }
 
   private boolean checkCollision(Vector3 direction) {
-    BoundingBox playerBoundingBox = new BoundingBox(position.cpy().sub(SIZE, 0f, SIZE).add(direction), position.cpy().add(SIZE, HEIGHT, SIZE).add(direction));
+    boundingBox.set(position.cpy().sub(SIZE, 0f, SIZE).add(direction), position.cpy().add(SIZE, HEIGHT, SIZE).add(direction));
 
     for (Chunk chunk : World.getChunksInRange(position, 1f)) {
       for (Block block : chunk.getBlocks()) {
-        if (playerBoundingBox.intersects(block.getBoundingBox())) {
+        if (boundingBox.intersects(block.getBoundingBox())) {
           return true;
         }
       }

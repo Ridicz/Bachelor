@@ -44,7 +44,7 @@ public class Renderer {
 
     Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-    Texture texture = new Texture("assetshd.jpg");
+    Texture texture = new Texture("atlas.jpg");
     texture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
 
     material = new Material(TextureAttribute.createDiffuse(texture));
@@ -63,7 +63,7 @@ public class Renderer {
     modelBatch.begin(game.getCamera());
 
     game.getWorld().renderWorld(modelBatch, environment);
-    modelBatch.render(game.getWorld().getSkydome());
+//    modelBatch.render(game.getWorld().getSkydome());
 
     modelBatch.end();
   }

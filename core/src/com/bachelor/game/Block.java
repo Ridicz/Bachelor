@@ -17,13 +17,15 @@ public class Block extends Item {
 
   private Set<Side> visibleSides;
 
+  private static BoundingBox boundingBox = new BoundingBox();
+
   public Block(IntegerPosition position, BlockType blockType) {
     super();
     this.position = position;
     this.blockType = blockType;
     this.blockId = currentId++;
     this.visibleSides = new HashSet<>();
-    System.out.println(blockId);
+//    System.out.println(blockId);
   }
 
   public IntegerPosition getPosition() {
@@ -31,7 +33,7 @@ public class Block extends Item {
   }
 
   public BoundingBox getBoundingBox() {
-    return new BoundingBox(position.getPositionVector(), position.getPositionVector().cpy().add(1f, 1f, 1f));
+    return boundingBox.set(position.getPositionVector(), position.getPositionVector().cpy().add(1f, 1f, 1f));
   }
 
   public BlockType getBlockType() {

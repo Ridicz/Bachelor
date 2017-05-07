@@ -7,7 +7,9 @@ import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class Chunk {
@@ -20,16 +22,27 @@ public class Chunk {
 
   private IntegerPosition startPosition;
 
+  private IntegerPosition endPosition;
+
   private Block[][][] storage;
 
   private Set<Block> blocks;
 
-  private Mesh mesh;
+  private List<Mesh> meshes;
+
+  private boolean rebuildModel = true;
+
+  private BoundingBox boundingBox;
+
+  private ChunkAndBlockPosition localChunkAndBlockPosition = new ChunkAndBlockPosition();
 
   public Chunk(int x, int y) {
     startPosition = new IntegerPosition(x * WIDTH, 0, y * LENGTH);
     storage = new Block[WIDTH][HEIGHT][LENGTH];
     blocks = new HashSet<>(1024);
+    meshes = new ArrayList<>();
+    endPosition = startPosition.add(WIDTH, HEIGHT, LENGTH);
+    boundingBox = new BoundingBox(startPosition.getPositionVector(), endPosition.getPositionVector());
   }
 
   public void initializeVisibleBlocks() {
@@ -37,8 +50,19 @@ public class Chunk {
       for (int j = 0; j < HEIGHT; j++) {
         for (int k = 0; k < LENGTH; k++) {
           if (storage[i][j][k] != null) {
+            addVisibleSides(storage[i][j][k]);
+          }
+        }
+      }
+    }
+  }
+
+  public void loadVisibleBlocks() {
+    for (int i = 0; i < WIDTH; i++) {
+      for (int j = 0; j < HEIGHT; j++) {
+        for (int k = 0; k < LENGTH; k++) {
+          if (storage[i][j][k] != null) {
             Block block = storage[i][j][k];
-            addVisibleSides(i, j, k, block);
 
             if (block.getVisibleSides().size() > 0) {
               blocks.add(block);
@@ -47,82 +71,51 @@ public class Chunk {
         }
       }
     }
-
-    rebuildModel();
   }
 
-  private void addVisibleSides(int x, int y, int z, Block block) { //TODO reformat this crap
-    if (x == 0) {
-      Chunk chunk = World.getChunk(startPosition.add(new IntegerPosition(x, y, z)).sub(new IntegerPosition(WIDTH, 0, 0)));
+  private void addVisibleSides(Block block) {
+    IntegerPosition position = block.getPosition();
 
-      if (chunk != null && chunk.getBlock(WIDTH - 1, y, z) == null) {
-        block.addVisibleSide(Side.Back);
-      }
+    getNeighbour(position, Side.Front);
+    Block neighbour = localChunkAndBlockPosition.getBlock();
 
-      if (storage[x + 1][y][z] == null) {
-        block.addVisibleSide(Side.Front);
-      }
-    } else if (x == WIDTH - 1) {
-      Chunk chunk = World.getChunk(startPosition.add(new IntegerPosition(x, y, z)).add(new IntegerPosition(WIDTH, 0, 0)));
-
-      if (chunk != null && chunk.getBlock(0, y, z) == null) {
-        block.addVisibleSide(Side.Front);
-      }
-
-      if (storage[x - 1][y][z] == null) {
-        block.addVisibleSide(Side.Back);
-      }
-    } else {
-      if (storage[x + 1][y][z] == null) {
-        block.addVisibleSide(Side.Front);
-      }
-
-      if (storage[x - 1][y][z] == null) {
-        block.addVisibleSide(Side.Back);
-      }
+    if (neighbour == null) {
+      block.addVisibleSide(Side.Front);
     }
 
-    if (y > 0 && y < HEIGHT - 1) {
-      if (storage[x][y + 1][z] == null) {
-        block.addVisibleSide(Side.Top);
-      }
+    getNeighbour(position, Side.Back);
+    neighbour = localChunkAndBlockPosition.getBlock();
 
-      if (storage[x][y - 1][z] == null) {
-        block.addVisibleSide(Side.Bottom);
-      }
-    } else {
+    if (neighbour == null) {
+      block.addVisibleSide(Side.Back);
+    }
+
+    getNeighbour(position, Side.Left);
+    neighbour = localChunkAndBlockPosition.getBlock();
+
+    if (neighbour == null) {
+      block.addVisibleSide(Side.Left);
+    }
+
+    getNeighbour(position, Side.Right);
+    neighbour = localChunkAndBlockPosition.getBlock();
+
+    if (neighbour == null) {
+      block.addVisibleSide(Side.Right);
+    }
+
+    getNeighbour(position, Side.Top);
+    neighbour = localChunkAndBlockPosition.getBlock();
+
+    if (neighbour == null) {
       block.addVisibleSide(Side.Top);
-      block.addVisibleSide(Side.Bottom);
     }
 
-    if (z == 0) {
-      Chunk chunk = World.getChunk(startPosition.add(new IntegerPosition(x, y, z)).sub(new IntegerPosition(0, 0, LENGTH)));
+    getNeighbour(position, Side.Bottom);
+    neighbour = localChunkAndBlockPosition.getBlock();
 
-      if (chunk != null && chunk.getBlock(x, y, LENGTH - 1) == null) {
-        block.addVisibleSide(Side.Right);
-      }
-
-      if (storage[x][y][z] == null) {
-        block.addVisibleSide(Side.Left);
-      }
-    } else if (z == LENGTH - 1) {
-      Chunk chunk = World.getChunk(startPosition.add(new IntegerPosition(x, y, z)).add(new IntegerPosition(0, 0, LENGTH)));
-
-      if (chunk != null && chunk.getBlock(x, y, 0) == null) {
-        block.addVisibleSide(Side.Left);
-      }
-
-      if (storage[x][y][z - 1] == null) {
-        block.addVisibleSide(Side.Right);
-      }
-    } else {
-      if (storage[x][y][z - 1] == null) {
-        block.addVisibleSide(Side.Right);
-      }
-
-      if (storage[x][y][z] == null) {
-        block.addVisibleSide(Side.Left);
-      }
+    if (neighbour == null) {
+      block.addVisibleSide(Side.Bottom);
     }
   }
 
@@ -131,10 +124,7 @@ public class Chunk {
   }
 
   public IntegerPosition getEndPosition() {
-    int x = startPosition.getX() + WIDTH;
-    int z = startPosition.getZ() + LENGTH;
-
-    return new IntegerPosition(x, HEIGHT, z);
+    return endPosition;
   }
 
   public Block getBlock(Vector3 position) {
@@ -169,9 +159,13 @@ public class Chunk {
   }
 
   public void setBlockPlayer(Block selectedBlock, Side side, BlockType type) {
-    ChunkAndBlockPosition target = getNeighbour(selectedBlock.getPosition(), side);
+    getNeighbour(selectedBlock.getPosition(), side);
 
-    Block block = target.getChunk().setBlock(target.getPosition().getX() % WIDTH, target.getPosition().getY(), target.getPosition().getZ() % LENGTH, type);
+    Block block = localChunkAndBlockPosition.getChunk().setBlock(localChunkAndBlockPosition.getPosition().getX() % WIDTH, localChunkAndBlockPosition.getPosition().getY(), localChunkAndBlockPosition.getPosition().getZ() % LENGTH, type);
+
+    if (block == null) {
+      return;
+    }
 
     block.addVisibleSide(Side.Front);
     block.addVisibleSide(Side.Back);
@@ -180,8 +174,8 @@ public class Chunk {
     block.addVisibleSide(Side.Left);
     block.addVisibleSide(Side.Right);
 
-    target.getChunk().getBlocks().add(block);
-    target.getChunk().rebuildModel();
+    localChunkAndBlockPosition.getChunk().getBlocks().add(block);
+    localChunkAndBlockPosition.getChunk().setRebuildModel();
   }
 
   public void destroyBlock(Block block) {
@@ -192,213 +186,177 @@ public class Chunk {
     int localZ = position.getZ() % LENGTH;
 
     storage[localX][localY][localZ] = null;
-    makeNeighbourBlocksVisible(localX, localY, localZ);
+    makeNeighbourBlocksVisible(position);
     blocks.remove(block);
 
-    rebuildModel();
+    rebuildModel = true;
   }
 
-  private void makeNeighbourBlocksVisible(int x, int y, int z) { //TODO reformat this crap also
-    Block block = null;
+  private void makeNeighbourBlocksVisible(IntegerPosition position) {
+    getNeighbour(position, Side.Front);
+    Block neighbour = localChunkAndBlockPosition.getBlock();
 
-    if (x == 0) {
-      Chunk chunk = World.getChunk(startPosition.add(new IntegerPosition(x, y, z)).sub(new IntegerPosition(WIDTH, 0, 0)));
-
-      if (chunk != null) {
-        block = chunk.getBlock(WIDTH - 1, y, z);
-      }
-
-      if (block != null) {
-        block.addVisibleSide(Side.Front);
-        chunk.addVisibleBlock(block);
-        chunk.rebuildModel();
-      }
-
-      if (storage[x + 1][y][z] != null) {
-        storage[x + 1][y][z].addVisibleSide(Side.Back);
-        blocks.add(storage[x + 1][y][z]);
-      }
-    } else if (x == WIDTH - 1) {
-      Chunk chunk = World.getChunk(startPosition.add(new IntegerPosition(x, y, z)).add(new IntegerPosition(WIDTH, 0, 0)));
-
-      if (chunk != null) {
-        block = chunk.getBlock(0, y, z);
-      }
-
-      if (block != null) {
-        block.addVisibleSide(Side.Back);
-        chunk.addVisibleBlock(block);
-        chunk.rebuildModel();
-      }
-
-      if (storage[x - 1][y][z] != null) {
-        storage[x - 1][y][z].addVisibleSide(Side.Front);
-        blocks.add(storage[x - 1][y][z]);
-      }
-    } else {
-      if (storage[x + 1][y][z] != null) {
-        storage[x + 1][y][z].addVisibleSide(Side.Back);
-        blocks.add(storage[x + 1][y][z]);
-      }
-
-      if (storage[x - 1][y][z] != null) {
-        storage[x - 1][y][z].addVisibleSide(Side.Front);
-        blocks.add(storage[x - 1][y][z]);
-      }
+    if (neighbour != null) {
+      neighbour.addVisibleSide(Side.Back);
+      localChunkAndBlockPosition.getChunk().addVisibleBlock(neighbour.getPosition());
     }
 
-    if (storage[x][y + 1][z] != null) {
-      storage[x][y + 1][z].addVisibleSide(Side.Bottom);
-      blocks.add(storage[x][y + 1][z]);
+    getNeighbour(position, Side.Back);
+    neighbour = localChunkAndBlockPosition.getBlock();
+
+    if (neighbour != null) {
+      neighbour.addVisibleSide(Side.Front);
+      localChunkAndBlockPosition.getChunk().addVisibleBlock(neighbour.getPosition());
     }
 
-    if (y != 0 && storage[x][y - 1][z] != null) {
-      storage[x][y - 1][z].addVisibleSide(Side.Top);
-      blocks.add(storage[x][y - 1][z]);
+    getNeighbour(position, Side.Left);
+    neighbour = localChunkAndBlockPosition.getBlock();
+
+    if (neighbour != null) {
+      neighbour.addVisibleSide(Side.Right);
+      localChunkAndBlockPosition.getChunk().addVisibleBlock(neighbour.getPosition());
     }
 
-    block = null;
+    getNeighbour(position, Side.Right);
+    neighbour = localChunkAndBlockPosition.getBlock();
 
-    if (z == 0) {
-      Chunk chunk = World.getChunk(startPosition.add(new IntegerPosition(x, y, z)).sub(new IntegerPosition(0, 0, LENGTH)));
+    if (neighbour != null) {
+      neighbour.addVisibleSide(Side.Left);
+      localChunkAndBlockPosition.getChunk().addVisibleBlock(neighbour.getPosition());
+    }
 
-      if (chunk != null) {
-        block = chunk.getBlock(x, y, LENGTH - 1);
-      }
+    getNeighbour(position, Side.Top);
+    neighbour = localChunkAndBlockPosition.getBlock();
 
-      if (block != null) {
-        block.addVisibleSide(Side.Left);
-        chunk.addVisibleBlock(block);
-        chunk.rebuildModel();
-      }
+    if (neighbour != null) {
+      neighbour.addVisibleSide(Side.Bottom);
+      localChunkAndBlockPosition.getChunk().addVisibleBlock(neighbour.getPosition());
+    }
 
-      if (storage[x][y][z + 1] != null) {
-        storage[x][y][z + 1].addVisibleSide(Side.Right);
-        blocks.add(storage[x][y][z + 1]);
-      }
-    } else if (z == LENGTH - 1) {
-      Chunk chunk = World.getChunk(startPosition.add(new IntegerPosition(x, y, z)).add(new IntegerPosition(0, 0, LENGTH)));
+    getNeighbour(position, Side.Bottom);
+    neighbour = localChunkAndBlockPosition.getBlock();
 
-      if (chunk != null) {
-        block = chunk.getBlock(x, y, 0);
-      }
-
-      if (block != null) {
-        block.addVisibleSide(Side.Right);
-        chunk.addVisibleBlock(block);
-        chunk.rebuildModel();
-      }
-
-      if (storage[x][y][z - 1] != null) {
-        storage[x][y][z - 1].addVisibleSide(Side.Left);
-        blocks.add(storage[x][y][z - 1]);
-      }
-    } else {
-      if (storage[x][y][z + 1] != null) {
-        storage[x][y][z + 1].addVisibleSide(Side.Right);
-        blocks.add(storage[x][y][z + 1]);
-      }
-
-      if (storage[x][y][z - 1] != null) {
-        storage[x][y][z - 1].addVisibleSide(Side.Left);
-        blocks.add(storage[x][y][z - 1]);
-      }
+    if (neighbour != null) {
+      neighbour.addVisibleSide(Side.Top);
+      localChunkAndBlockPosition.getChunk().addVisibleBlock(neighbour.getPosition());
     }
   }
 
-  public void addVisibleBlock(Block block) {
-    blocks.add(block);
+  public void addVisibleBlock(IntegerPosition position) {
+    int x = position.getX() % WIDTH;
+    int z = position.getZ() % LENGTH;
+
+    blocks.add(storage[x][position.getY()][z]);
+    rebuildModel = true;
   }
 
   public boolean isVisible() {
-    IntegerPosition endPosition = getEndPosition();
-
-    BoundingBox boundingBox = new BoundingBox(new Vector3(startPosition.getX(), startPosition.getY(), startPosition.getZ()),
-      new Vector3(endPosition.getX(), endPosition.getY(), endPosition.getZ()));
-
     return BachelorClient.getInstance().getCamera().frustum.boundsInFrustum(boundingBox);
   }
 
-  public void rebuildModel() {
+  public void setRebuildModel() {
+    rebuildModel = true;
+  }
+
+  private void rebuildModel() {
+    if (! meshes.isEmpty()) {
+      meshes.clear();
+    }
+
     MeshBuilder meshBuilder = new MeshBuilder();
     meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.TextureCoordinates | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.Normal, GL30.GL_TRIANGLES);
     meshBuilder.ensureCapacity(Short.MAX_VALUE, Short.MAX_VALUE);
 
     for (Block block : blocks) {
+      if (meshBuilder.getNumVertices() > Short.MAX_VALUE - 64) {
+        meshes.add(meshBuilder.end());
+        meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.TextureCoordinates | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.Normal, GL30.GL_TRIANGLES);
+        meshBuilder.ensureCapacity(Short.MAX_VALUE, Short.MAX_VALUE);
+      }
+
       BlockRenderer.renderBlockVisibleSides(block, meshBuilder);
     }
 
-    mesh = meshBuilder.end();
+    meshes.add(meshBuilder.end());
   }
 
-  public Mesh getMesh() {
-    return mesh;
+  public List<Mesh> getMeshes() {
+    if (rebuildModel) {
+      rebuildModel();
+      rebuildModel = false;
+    }
+
+    return meshes;
   }
 
-  public ChunkAndBlockPosition getNeighbour(IntegerPosition position, Side side) {
-    IntegerPosition neighbourPosition;
+  private void getNeighbour(IntegerPosition position, Side side) {
+    IntegerPosition localIntegerPosition;
 
     switch (side) {
       case Right:
-        if (position.getZ() % LENGTH != LENGTH - 1) {
-          return new ChunkAndBlockPosition(this, new IntegerPosition(position.getX(), position.getY(), position.getZ() + 1));
+        if ((position.getZ() + 1) % LENGTH != 0) {
+          localIntegerPosition = new IntegerPosition(position.getX(), position.getY(), position.getZ() + 1);
+          localChunkAndBlockPosition.set(this, localIntegerPosition);
         } else {
           Chunk chunk = World.getChunk(position.add(0, 0, LENGTH));
-
-          neighbourPosition = new IntegerPosition(position.getX(), position.getY(), position.getZ() + 1);
-
-          return new ChunkAndBlockPosition(chunk, neighbourPosition);
+          localIntegerPosition = new IntegerPosition(position.getX(), position.getY(), position.getZ() + 1);
+          localChunkAndBlockPosition.set(chunk, localIntegerPosition);
         }
+
+        break;
 
       case Left:
         if (position.getZ() % LENGTH != 0) {
-          return new ChunkAndBlockPosition(this, new IntegerPosition(position.getX(), position.getY(), position.getZ() - 1));
+          localIntegerPosition = new IntegerPosition(position.getX(), position.getY(), position.getZ() - 1);
+          localChunkAndBlockPosition.set(this, localIntegerPosition);
         } else {
           Chunk chunk = World.getChunk(position.sub(0, 0, LENGTH));
-
-          neighbourPosition = new IntegerPosition(position.getX(), position.getY(), position.getZ() - 1);
-
-          return new ChunkAndBlockPosition(chunk, neighbourPosition);
+          localIntegerPosition = new IntegerPosition(position.getX(), position.getY(), position.getZ() - 1);
+          localChunkAndBlockPosition.set(chunk, localIntegerPosition);
         }
+
+        break;
 
       case Top:
         if (position.getY() != HEIGHT - 1) {
-          return new ChunkAndBlockPosition(this, new IntegerPosition(position.getX(), position.getY() + 1, position.getZ()));
+          localIntegerPosition = new IntegerPosition(position.getX(), position.getY() + 1, position.getZ());
+          localChunkAndBlockPosition.set(this, localIntegerPosition);
         }
 
         break;
 
       case Bottom:
         if (position.getY() != 0) {
-          return new ChunkAndBlockPosition(this, new IntegerPosition(position.getX(), position.getY() - 1, position.getZ()));
+          localIntegerPosition = new IntegerPosition(position.getX(), position.getY() - 1, position.getZ());
+          localChunkAndBlockPosition.set(this, localIntegerPosition);
         }
 
         break;
 
       case Front:
-        if (position.getX() % WIDTH != 0) {
-          return new ChunkAndBlockPosition(this, new IntegerPosition(position.getX() - 1, position.getY(), position.getZ()));
-        } else {
-          Chunk chunk = World.getChunk(position.sub(WIDTH, 0, 0));
-
-          neighbourPosition = new IntegerPosition(position.getX() - 1, position.getY(), position.getZ());
-
-          return new ChunkAndBlockPosition(chunk, neighbourPosition);
-        }
-
-      case Back:
-        if (position.getX() % WIDTH != WIDTH - 1) {
-          return new ChunkAndBlockPosition(this, new IntegerPosition(position.getX() + 1, position.getY(), position.getZ()));
+        if ((position.getX() + 1) % WIDTH != 0) {
+          localIntegerPosition = new IntegerPosition(position.getX() + 1, position.getY(), position.getZ());
+          localChunkAndBlockPosition.set(this, localIntegerPosition);
         } else {
           Chunk chunk = World.getChunk(position.add(WIDTH, 0, 0));
-
-          neighbourPosition = new IntegerPosition(position.getX() + 1, position.getY(), position.getZ());
-
-          return new ChunkAndBlockPosition(chunk, neighbourPosition);
+          localIntegerPosition = new IntegerPosition(position.getX() + 1, position.getY(), position.getZ());
+          localChunkAndBlockPosition.set(chunk, localIntegerPosition);
         }
-    }
 
-    return null;
+        break;
+
+      case Back:
+        if (position.getX() % WIDTH != 0) {
+          localIntegerPosition = new IntegerPosition(position.getX() - 1, position.getY(), position.getZ());
+          localChunkAndBlockPosition.set(this, localIntegerPosition);
+        } else {
+          Chunk chunk = World.getChunk(position.sub(WIDTH, 0, 0));
+          localIntegerPosition = new IntegerPosition(position.getX() - 1, position.getY(), position.getZ());
+          localChunkAndBlockPosition.set(chunk, localIntegerPosition);
+        }
+
+        break;
+    }
   }
 
   @Override
