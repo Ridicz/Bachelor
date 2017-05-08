@@ -122,7 +122,7 @@ public class WorldGenerator {
             chunk.setBlock(x, y, z, BlockType.Dirt);
           } else if (type == 7) {
             chunk.setBlock(x, y, z, BlockType.Bedrock);
-          } else if (type == 8) {
+          } else if (type == 8 || type == 9) {
             chunk.setBlock(x, y, z, BlockType.Water);
           } else if (type == 12) {
             chunk.setBlock(x, y, z, BlockType.Sand);

@@ -22,7 +22,7 @@ public class Physics {
 
     if (Intersector.intersectRayBoundsFast(ray, localBoundingBox)) {
       distance = ray.origin.dst(localVector.cpy().add(0f, 0.5f, 0.5f));
-      selectedSide = Side.Front;
+      selectedSide = Side.Back;
     }
 
     localBoundingBox.set(localVector, localVector.cpy().add(1f, 1f, 0f));
@@ -65,7 +65,7 @@ public class Physics {
 
     if (Intersector.intersectRayBoundsFast(ray, localBoundingBox)) {
       if (ray.origin.dst(localVector.cpy().add(1f, 0.5f, 0.5f)) < distance) {
-        selectedSide = Side.Back;
+        selectedSide = Side.Front;
       }
     }
 
