@@ -1,5 +1,7 @@
 package com.bachelor.game;
 
+import com.bachelor.game.entities.Player;
+import com.bachelor.game.enums.InputKeys;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
@@ -111,8 +113,8 @@ public class InputHandler implements InputProcessor {
   }
 
   private void updateRotation() {
-    float yaw = Gdx.input.getDeltaX() * MOUSE_SENSITIVITY;
-    float pitch = Gdx.input.getDeltaY() * MOUSE_SENSITIVITY;
+    float yaw = -Gdx.input.getDeltaX() * MOUSE_SENSITIVITY;
+    float pitch = -Gdx.input.getDeltaY() * MOUSE_SENSITIVITY;
 
     player.rotate(yaw, pitch);
   }

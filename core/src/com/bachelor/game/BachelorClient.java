@@ -1,5 +1,8 @@
 package com.bachelor.game;
 
+import com.bachelor.game.entities.Player;
+import com.bachelor.game.graphics.Renderer;
+import com.bachelor.game.world.World;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -54,7 +57,8 @@ public class BachelorClient extends ApplicationAdapter {
 
 		font = new BitmapFont();
 		font.setColor(Color.RED);
-		font.getData().scale(2f);
+		font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+//		font.getData().scale(1f);
 
 		hudCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		hudBatch = new SpriteBatch();
@@ -71,13 +75,14 @@ public class BachelorClient extends ApplicationAdapter {
 		Sprite sprite = new Sprite(new Texture("crosshair.png"));
 		sprite.setPosition(-20, -20);
 		sprite.draw(hudBatch);
-		font.draw(hudBatch, player.getPosition().toString(), 0, 400f);
+		font.draw(hudBatch, "Position: " + player.printPosition(), -500f, 350f);
 		hudBatch.end();
 	}
 	
 	@Override
 	public void dispose () {
-
+		hudBatch.dispose();
+		font.dispose();
 	}
 
 	public PerspectiveCamera getCamera() {
