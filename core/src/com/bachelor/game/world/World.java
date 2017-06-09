@@ -24,18 +24,12 @@ public class World {
 
   private static ModelBuilder modelBuilder;
 
-  private ModelInstance skydome;
-
   private static Vector3 localVector = new Vector3();
 
   public World() {
     instance = this;
     modelBuilder = new ModelBuilder();
     chunkList = new ArrayList<>();
-//    AssetManager assetManager = new AssetManager();
-//    assetManager.load("skydome.g3db", Model.class);
-//    assetManager.finishLoading();
-//    skydome = new ModelInstance(assetManager.get("skydome.g3db", Model.class));
     BlockRenderer.prepareTextures();
     createTestMap();
     initWorld();
@@ -131,9 +125,5 @@ public class World {
     chunks.remove(null);
 
     return chunks;
-  }
-
-  public ModelInstance getSkydome() {
-    return skydome;
   }
 }

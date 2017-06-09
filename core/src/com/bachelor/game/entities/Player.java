@@ -9,10 +9,7 @@ import com.bachelor.game.utils.Rotation;
 import com.bachelor.game.world.Chunk;
 import com.bachelor.game.world.World;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
-import com.badlogic.gdx.math.Intersector;
-import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.math.collision.Ray;
 
@@ -28,11 +25,11 @@ public class Player {
 
   public static final float CAMERA_HEIGHT = 1.6f;
 
+  public static final float REACH_RANGE = 5.5f;
+
   private static final float WALK_SPEED = 0.16f;
 
   private static final float ACCELERATION = 0.008f;
-
-  private static final float REACH_RANGE = 5.5f;
 
   private Vector3 position;
 
@@ -48,16 +45,19 @@ public class Player {
 
   private float verticalVelocity = 0f;
 
-  private Vector2 jumpDirection = new Vector2();
-
   private Set<InputKeys> pressedKeys = new HashSet<>();
+
+  private Vector2 jumpDirection = new Vector2();
+  private Vector2 localVector2 = new Vector2();
+  private Vector2 localVector2Helper = new Vector2();
+  private Vector2 moveVector = new Vector2();
 
   private Vector3 localVector = new Vector3();
 
   private BoundingBox boundingBox = new BoundingBox();
 
   public Player(PerspectiveCamera camera) {
-    this(camera, new Vector3(3f, 200f, 70f));
+    this(camera, new Vector3(3f, 120f, 70f));
   }
 
   public Player(PerspectiveCamera camera, Vector3 position) {
@@ -100,10 +100,100 @@ public class Player {
     this.toolEquipped = toolEquipped;
   }
 
+  public void rotate(float yaw, float pitch) {
+//    float oldCameraX = camera.direction.x;
+//    float oldCameraZ = camera.direction.z;
+//    camera.direction.rotate(camera.up, yaw);
+//    localVector.set(camera.direction).crs(camera.up).nor();
+//    camera.direction.rotate(localVector, pitch);
+//
+//    if (Math.signum(camera.direction.z) != Math.signum(oldCameraZ) && Math.signum(camera.direction.x) != Math.signum(oldCameraX)) {
+//      camera.direction.rotate(localVector, -pitch);
+//    }
+
+    yaw = -yaw;
+    pitch = -pitch;
+
+    localVector.set(camera.direction);
+
+    Quaternion q = new Quaternion();
+    camera.view.getRotation(q);
+    q.setEulerAngles(-yaw, 0f, 0f);
+    Matrix4 mat = new Matrix4();
+    mat.set(q);
+
+    camera.direction.prj(mat);
+
+    if (camera.direction.y >= -0.995f && pitch > 0) {
+      camera.direction.rotate(localVector.crs(camera.up), -pitch);
+    }
+
+    if (camera.direction.y <= 0.995f && pitch < 0) {
+      camera.direction.rotate(localVector.crs(camera.up), -pitch);
+    }
+  }
+
+  public boolean isOnGround() {
+    return MathUtils.isZero(verticalVelocity) && checkCollision(localVector.set(0f, -0.1f, 0f));
+  }
+
+  public void update() {
+    if (pressedKeys.contains(InputKeys.Jump) && isOnGround()) {
+      verticalVelocity = 0.16f;
+    }
+
+    boolean moving = false;
+
+    localVector2.setZero();
+
+    if (pressedKeys.contains(InputKeys.Forward)) {
+      localVector2.set(move(InputKeys.Forward));
+      moving = true;
+    } else if (pressedKeys.contains(InputKeys.Backward)) {
+      localVector2.set(move(InputKeys.Backward));
+      moving = true;
+    }
+
+    if (pressedKeys.contains(InputKeys.Left)) {
+      localVector2.add(move(InputKeys.Left));
+      moving = true;
+    } else if (pressedKeys.contains(InputKeys.Right)) {
+      localVector2.add(move(InputKeys.Right));
+      moving = true;
+    }
+
+    if (! moving) {
+      horizontalVelocity = 0;
+    }
+
+    localVector2.limit(WALK_SPEED);
+
+    localVector.set(localVector2.x, 0f, 0f);
+
+    if (! checkCollision(localVector)) {
+      position.add(localVector);
+    }
+
+    localVector.set(0f, verticalVelocity, 0f);
+
+    if (! checkCollision(localVector)) {
+      position.add(localVector);
+      verticalVelocity -= 0.01f;
+    } else {
+      verticalVelocity = 0f;
+    }
+
+    localVector.set(0f, 0f, localVector2.y);
+
+    if (! checkCollision(localVector)) {
+      position.add(localVector);
+    }
+
+    camera.position.set(position.x, position.y + CAMERA_HEIGHT, position.z);
+  }
+
   public Vector2 move(InputKeys direction) {
     horizontalVelocity = Math.min(WALK_SPEED, horizontalVelocity + ACCELERATION);
-
-    Vector2 moveVector =  new Vector2();
 
     switch (direction) {
       case Left:
@@ -123,104 +213,13 @@ public class Player {
         break;
     }
 
-    Vector2 rotation = new Vector2(camera.direction.x, camera.direction.z);
+    localVector2Helper.set(camera.direction.x, camera.direction.z);
 
-    moveVector.rotate(rotation.angle());
+    moveVector.rotate(localVector2Helper.angle());
 
     jumpDirection.set(moveVector);
 
     return moveVector;
-  }
-
-  public void rotate(float yaw, float pitch) {
-    float oldCameraX = camera.direction.x;
-    float oldCameraZ = camera.direction.z;
-    camera.direction.rotate(camera.up, yaw);
-    localVector.set(camera.direction).crs(camera.up).nor();
-    camera.direction.rotate(localVector, pitch);
-
-    if (Math.signum(camera.direction.z) != Math.signum(oldCameraZ) && Math.signum(camera.direction.x) != Math.signum(oldCameraX)) {
-      camera.direction.rotate(localVector, -pitch);
-    }
-
-//    localVector.set(camera.direction);
-//
-//    Quaternion q = new Quaternion();
-//    camera.view.getRotation(q);
-//    q.setEulerAngles(-yaw, 0f, 0f);
-//    Matrix4 mat = new Matrix4();
-//    mat.set(q);
-//
-//    camera.direction.prj(mat);
-//
-//    if (camera.direction.y >= -0.995f && pitch > 0) {
-//      camera.direction.rotate(localVector.crs(camera.up), -pitch);
-//    }
-//
-//    if (camera.direction.y <= 0.995f && pitch < 0) {
-//      camera.direction.rotate(localVector.crs(camera.up), -pitch);
-//    }
-  }
-
-  public void isOnGround() {
-    if (MathUtils.isZero(verticalVelocity) && checkCollision(localVector.set(0f, -0.1f, 0f))) {
-      verticalVelocity = 0.16f;
-    }
-  }
-
-  public void update() {
-    if (pressedKeys.contains(InputKeys.Jump)) {
-      isOnGround();
-    }
-
-    boolean moving = false;
-
-    Vector2 horizontalShift = new Vector2();
-
-    if (pressedKeys.contains(InputKeys.Forward)) {
-      horizontalShift.set(move(InputKeys.Forward));
-      moving = true;
-    } else if (pressedKeys.contains(InputKeys.Backward)) {
-      horizontalShift.set(move(InputKeys.Backward));
-      moving = true;
-    }
-
-    if (pressedKeys.contains(InputKeys.Left)) {
-      horizontalShift.add(move(InputKeys.Left));
-      moving = true;
-    } else if (pressedKeys.contains(InputKeys.Right)) {
-      horizontalShift.add(move(InputKeys.Right));
-      moving = true;
-    }
-
-    if (! moving) {
-      horizontalVelocity = 0;
-    }
-
-    horizontalShift.limit(WALK_SPEED);
-
-    Vector3 shift = new Vector3(horizontalShift.x, 0f, 0f);
-
-    if (! checkCollision(shift)) {
-      position.add(shift);
-    }
-
-    shift.set(0f, verticalVelocity, 0f);
-
-    if (! checkCollision(shift)) {
-      position.add(shift);
-      verticalVelocity -= 0.01f;
-    } else {
-      verticalVelocity = 0f;
-    }
-
-    shift.set(0f, 0f, horizontalShift.y);
-
-    if (! checkCollision(shift)) {
-      position.add(shift);
-    }
-
-    camera.position.set(position.x, position.y + CAMERA_HEIGHT, position.z);
   }
 
   private boolean checkCollision(Vector3 direction) {
@@ -289,48 +288,8 @@ public class Player {
     }
   }
 
-  //TODO move to Physics, replace new with static variables
   public Block getTargetBlock(int screenX, int screenY) {
-    Block result = null;
-    float distance = -1;
-
-    Ray ray = camera.getPickRay(screenX, screenY);
-    Vector3 pos = new Vector3(camera.position);
-
-    float dst = Float.MAX_VALUE;
-
-    for (Chunk chunk : World.getChunksInRange(position, REACH_RANGE)) {
-      for (Block block : chunk.getVisibleBlocks()) {
-        float dist2 = ray.origin.dst2(pos);
-
-        if (distance >= 0f && dist2 > distance) {
-          continue;
-        }
-
-        if (Intersector.intersectRayBoundsFast(ray, pos, new Vector3(1, 1, 1))) {
-          distance = dist2;
-
-          Vector3 v = new Vector3();
-          if (Intersector.intersectRayBounds(ray, new BoundingBox(new Vector3(block.getPosition().getX(),
-            block.getPosition().getY(), block.getPosition().getZ()), new Vector3(block.getPosition().getX() + 1,
-            block.getPosition().getY() + 1, block.getPosition().getZ() + 1)), v)) {
-
-            float curDst = v.dst(position);
-
-            if (curDst < dst) {
-              dst = curDst;
-              result = block;
-            }
-          }
-        }
-      }
-    }
-
-    if (dst > 5) {
-      return null;
-    }
-
-    return result;
+    return Physics.getTargetBlock(screenX, screenY, camera);
   }
 
   public void addKeyPressed(InputKeys key) {

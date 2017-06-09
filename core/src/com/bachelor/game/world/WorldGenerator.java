@@ -98,7 +98,7 @@ public class WorldGenerator {
       int z;
       int type;
 
-      for (int i = 0; i < 386; i++) {
+      for (int i = 0; i < 20; i++) {
         reader.beginArray();
         reader.beginObject();
 
