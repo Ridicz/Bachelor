@@ -56,6 +56,8 @@ public class Player {
 
   private BoundingBox boundingBox = new BoundingBox();
 
+  private DecimalFormat positionFormat = new DecimalFormat("##.##");
+
   public Player(PerspectiveCamera camera) {
     this(camera, new Vector3(3f, 120f, 70f));
   }
@@ -72,11 +74,11 @@ public class Player {
 
   public String printPosition() {
     return "X: [" +
-      new DecimalFormat("##.##").format(position.x) +
+     positionFormat.format(position.x) +
       "], Y: [" +
-      new DecimalFormat("##.##").format(position.y) +
+      positionFormat.format(position.y) +
       "], Z: [" +
-      new DecimalFormat("##.##").format(position.z) +
+      positionFormat.format(position.z) +
       "]";
   }
 

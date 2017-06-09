@@ -41,7 +41,9 @@ public class Chunk {
 
   private BoundingBox boundingBox;
 
-  private ChunkAndBlockPosition localChunkAndBlockPosition = new ChunkAndBlockPosition();
+  private static ChunkAndBlockPosition localChunkAndBlockPosition = new ChunkAndBlockPosition();
+
+  private static MeshBuilder meshBuilder = new MeshBuilder();
 
   public Chunk(int x, int y) {
     startPosition = new IntegerPosition(x * WIDTH, 0, y * LENGTH);
@@ -49,7 +51,7 @@ public class Chunk {
     visibleBlocks = new HashSet<>(1024);
     meshes = new ArrayList<>();
     endPosition = startPosition.add(WIDTH, HEIGHT, LENGTH);
-    boundingBox = new BoundingBox(startPosition.getPositionVector(), endPosition.getPositionVector());
+    boundingBox = new BoundingBox(startPosition.getPositionVector().cpy(), endPosition.getPositionVector().cpy());
   }
 
   public void initializeVisibleBlocks() {
@@ -270,7 +272,6 @@ public class Chunk {
       meshes.clear();
     }
 
-    MeshBuilder meshBuilder = new MeshBuilder();
     meshBuilder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.TextureCoordinates | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.Normal, GL30.GL_TRIANGLES);
     meshBuilder.ensureCapacity(Short.MAX_VALUE, Short.MAX_VALUE);
 
@@ -285,6 +286,7 @@ public class Chunk {
     }
 
     meshes.add(meshBuilder.end());
+    meshBuilder.clear();
   }
 
   public List<Mesh> getMeshes() {

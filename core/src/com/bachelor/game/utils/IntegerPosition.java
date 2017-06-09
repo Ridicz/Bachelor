@@ -10,7 +10,7 @@ public class IntegerPosition {
 
   private int z;
 
-  private Vector3 localVector = new Vector3();
+  private static Vector3 localVector = new Vector3();
 
   public IntegerPosition(int x, int y, int z) {
     this.x = x;

@@ -33,6 +33,8 @@ public class BachelorClient extends ApplicationAdapter {
 
 	private BitmapFont font;
 
+	private Sprite crosshair;
+
 	public static BachelorClient getInstance() {
 		return gameInstance;
 	}
@@ -46,6 +48,8 @@ public class BachelorClient extends ApplicationAdapter {
 		Gdx.input.setCursorCatched(true);
 		world = new World();
 		gameInstance = this;
+		crosshair = new Sprite(new Texture("crosshair.png"));
+		crosshair.setPosition(-20, -20);
 	}
 
 	private void initCamera() {
@@ -58,7 +62,7 @@ public class BachelorClient extends ApplicationAdapter {
 		font = new BitmapFont();
 		font.setColor(Color.RED);
 		font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-//		font.getData().scale(1f);
+		font.getData().scale(1.2f);
 
 		hudCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		hudBatch = new SpriteBatch();
@@ -69,12 +73,9 @@ public class BachelorClient extends ApplicationAdapter {
 	public void render () {
 		player.update();
 		renderer.render();
-
 		hudCamera.update();
 		hudBatch.begin();
-		Sprite sprite = new Sprite(new Texture("crosshair.png"));
-		sprite.setPosition(-20, -20);
-		sprite.draw(hudBatch);
+		crosshair.draw(hudBatch);
 		font.draw(hudBatch, "Position: " + player.printPosition(), -500f, 350f);
 		hudBatch.end();
 	}

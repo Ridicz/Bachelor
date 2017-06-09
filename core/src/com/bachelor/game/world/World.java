@@ -26,6 +26,8 @@ public class World {
 
   private static Vector3 localVector = new Vector3();
 
+  private ModelInstance modelInstance;
+
   public World() {
     instance = this;
     modelBuilder = new ModelBuilder();
@@ -63,7 +65,9 @@ public class World {
       }
     }
 
-    modelBatch.render(new ModelInstance(modelBuilder.end()));
+    modelInstance = new ModelInstance(modelBuilder.end());
+
+    modelBatch.render(modelInstance);
   }
 
   public static Chunk getChunk(Vector3 position) {

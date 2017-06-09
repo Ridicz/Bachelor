@@ -11,8 +11,8 @@ public class DesktopLauncher {
 
 	private static LwjglApplicationConfiguration createConfiguration() {
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-		config.width = 1024;
-		config.height = 768;
+		config.width = 1280;
+		config.height = 800;
 		config.fullscreen = false;
 		config.resizable = false;
 		config.title = "Bachelor Game";
