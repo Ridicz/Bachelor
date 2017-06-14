@@ -129,32 +129,20 @@ public class WorldGenerator {
           reader.nextName();
           type = Integer.parseInt(reader.nextString());
 
-          if (type == 0) {
-            chunk.setBlock(x, y, z, BlockType.Cobblestone);
-          } else if (type == 1) {
-            chunk.setBlock(x, y, z, BlockType.Grass);
-          } else if (type == 4) {
-            chunk.setBlock(x, y, z, BlockType.Dirt);
-          } else if (type == 7) {
-            chunk.setBlock(x, y, z, BlockType.Bedrock);
-          } else if (type == 8 || type == 9) {
-            chunk.setBlock(x, y, z, BlockType.Water);
-          } else if (type == 12) {
-            chunk.setBlock(x, y, z, BlockType.Sand);
-          } else if (type == 13) {
-            chunk.setBlock(x, y, z, BlockType.Gravel);
-          } else if (type == 14) {
-            chunk.setBlock(x, y, z, BlockType.Gold);
-          } else if (type == 15) {
-            chunk.setBlock(x, y, z, BlockType.Iron);
-          } else if (type == 16) {
-            chunk.setBlock(x, y, z, BlockType.Coal);
-          } else if (type == 17) {
-            chunk.setBlock(x, y, z, BlockType.Wood);
-          } else if (type == 18) {
-            chunk.setBlock(x, y, z, BlockType.Leafs);
-          } else {
-//            chunk.setBlock(x, y, z, BlockType.Checker);
+          switch (type) {
+            case 0: chunk.setBlock(x, y, z, BlockType.Cobblestone); break;
+            case 1: chunk.setBlock(x, y, z, BlockType.Grass); break;
+            case 4: chunk.setBlock(x, y, z, BlockType.Dirt); break;
+            case 7: chunk.setBlock(x, y, z, BlockType.Bedrock); break;
+            case 8: chunk.setBlock(x, y, z, BlockType.Water); break;
+            case 12: chunk.setBlock(x, y, z, BlockType.Sand); break;
+            case 13: chunk.setBlock(x, y, z, BlockType.Gravel); break;
+            case 14: chunk.setBlock(x, y, z, BlockType.Gold); break;
+            case 15: chunk.setBlock(x, y, z, BlockType.Iron); break;
+            case 16: chunk.setBlock(x, y, z, BlockType.Coal); break;
+            case 17: chunk.setBlock(x, y, z, BlockType.Wood); break;
+            case 18: chunk.setBlock(x, y, z, BlockType.Leafs); break;
+            default: //chunk.setBlock(x, y, z, BlockType.Checker); break;
           }
 
           reader.endObject();
